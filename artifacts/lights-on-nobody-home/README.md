@@ -54,8 +54,10 @@ loudness, and the mix has a synthetic room.
 * `docs/vocal-guide.md` the notes to sing, one per syllable, with bar, beat and length; also `midi/vocal-guide.mid`
 * `midi/` one file per part
 * `wavs/` one stem per part, about 70 MB each, so they are not in git: rebuild them with the command below
-* `mixes/lights-on-nobody-home.flac` a reference mix (24-bit FLAC, 37 MB), made by number rather than by ear
-* `mixes/lights-on-nobody-home-with-guide.mp3` the same mix with the guide voice added, for learning the tune
+* `mixes/lights-on-nobody-home-v3.flac` the latest reference mix (24-bit FLAC, 38 MB), made by number rather than by ear
+* `mixes/lights-on-nobody-home-v3-with-guide.mp3` the same mix with the guide voice added, for learning the tune
+* `mixes/...-v2...` the previous version, kept for comparison. v3 lets plucked notes ring after the finger lifts, gives
+  the strings a body and damps their high harmonics faster than the low ones, and gives the guitarron a fuller tone
 
 Rebuild with `python3 scripts/lights-on-nobody-home/track.py`, and the vocal guide with
 `python3 scripts/lights-on-nobody-home/vocal-guide.py` (both need a built Valis, `VALIS=/path/to/valis`).
