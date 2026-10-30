@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Rendered audio is large (stems are about 90 MB each); rebuild with scripts/<track>/track.py
+artifacts/*/wavs/
+artifacts/*/mixes/*.wav
