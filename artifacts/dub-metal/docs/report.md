@@ -56,7 +56,7 @@ it was put.)
 * **`measure` found two real faults at once**: the first `free-bell` clipped at +18 dBFS earlier in this work, and here the
   909 stem clips four samples (true peak +1.16 dBTP). The first is fixed; the second is handled by the mix but left in
   the stem.
-* **The LUFS target**: v1 to v3 all land on -14.0 LUFS with true peaks of -2.4 to -2.6 dBTP, so the versions compare at the
+* **The LUFS target**: v1 to v4 all land on -14.0 LUFS with true peaks of -2.4 to -2.8 dBTP, so the versions compare at the
   same loudness.
 * **`compare`** said v1 and v2 differ by 0.72 dB of spectral distance: raising the metal changed little overall.
 * The new circuits (`dub-bass`, `dub-delay`) and the existing ones all pass the examples lint test.
@@ -87,6 +87,23 @@ it was put.)
 * **Only one industrial source** (`metal-bash.ttl`) is used. Nothing machine-like (a gated noise loop, a clanking
   sequence) beyond the five-sixteenth cycle.
 * The app reports `sampleRate` 8000 in `get_diagnostics` while renders use 48000 (already in `TODO.md`).
+
+## Revision after listening: v4
+
+The first listener said the stabs did not bubble and that the only metal they heard was bells. The measurements agreed.
+
+* **Metal.** `metal-bash.ttl` rings for two to three seconds on a tuned note, which reads as a bell, and its hammer strike is
+  far quieter than the ring. `examples/metal-clang.ttl` keeps the ring to about a third of a second, drives it harder, and
+  sends the hammer's noise burst straight to the output. The notes moved down to C3 to C4, in two interlocking cycles of
+  five and three sixteenths.
+* **Stabs.** They were quiet, soft and long. They are now short (0.12 beat), double the root an octave up, and play every
+  offbeat in the bash and peak sections, with the second and fourth beats louder. The groove keeps two per bar.
+* **A fault found on the way.** The first `metal-clang` render was silent after one click. A `val:Tanh` in `ADAA2` mode turned
+  a very large input into NaN (`exp(-2x)` overflows below x of about -354). I had not read the `rms nan` in the render log
+  before starting to mix. The element is fixed, there is a test for it, and the entry is in `MISTAKES.md`.
+* **Result, measured.** The share of energy above 2 kHz roughly doubled where the metal plays: bash 1.24% to 2.42%, peak 0.92%
+  to 1.73%, dub 0.20% to 0.38%. Section levels still differ by only 3 to 4 dB. That is still a mix dominated by the low end,
+  and whether the metal now reads as bashing and the stabs as bubbling is for a listener, not for these figures.
 
 ## Not decided: needs a listener
 

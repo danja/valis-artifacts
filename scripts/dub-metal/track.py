@@ -1,7 +1,7 @@
 # scripts/dub-metal/track.py
 #
 # "dub-metal" (working title): dub reggae foundations with industrial metal-bashing on top, played by the circuits in
-# the Valis repository (dub-bass.ttl, 909.ttl, tonewheel-organ.ttl, metal-bash.ttl, free-bell.ttl) and sent through
+# the Valis repository (dub-bass.ttl, 909.ttl, tonewheel-organ.ttl, metal-clang.ttl, free-bell.ttl) and sent through
 # dub-delay.ttl. The brief is in sources/dub-metal-prompt.md.
 #
 #   python3 track.py score    write one MIDI file per part to artifacts/dub-metal/midi/
@@ -19,7 +19,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "dub-metal"))
 MIDI, WAVS, MIXES = (os.path.join(OUTDIR, d) for d in ("midi", "wavs", "mixes"))
 # Release is several times faster and renders the same samples; fall back to Debug when only that is built.
-RENDER = next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
+# VALIS_RENDER names a binary outright, for when the Release build is older than the code.
+RENDER = os.environ.get("VALIS_RENDER") or next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
                            for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
               os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
 sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
@@ -40,8 +41,8 @@ VAMP = ["C", "C", "Db", "C", "C", "C", "Fm", "Db"]
 
 # Which parts play in which section.
 PLAN = {"intro":  {"kit": "hats", "bass": "plain"},
-        "groove": {"kit": "onedrop", "bass": "plain", "stabs": "skank"},
-        "bash":   {"kit": "onedrop", "bass": "plain", "stabs": "sparse", "metal": "cycle"},
+        "groove": {"kit": "onedrop", "bass": "plain", "stabs": "light"},
+        "bash":   {"kit": "onedrop", "bass": "plain", "stabs": "skank", "metal": "cycle"},
         "dub":    {"bass": "plain", "stabs": "lone", "bell": "toll", "metal": "anvil"},
         "peak":   {"kit": "steppers", "bass": "heavy", "stabs": "skank", "metal": "cycle"},
         "outro":  {"kit": "hats", "bass": "plain", "stabs": "lone", "bell": "toll"}}
@@ -91,25 +92,30 @@ def build():
 
             # -- stabs: offbeat chords on the and of two and the and of four
             style = plan.get("stabs")
-            if style == "skank":
-                spots = [1.5, 3.5] if i % 2 == 0 else [3.5]
+            if style == "skank":      # every offbeat, the second and fourth louder: the chop that bubbles
+                spots = [0.5, 1.5, 2.5, 3.5]
+            elif style == "light":    # the and of two and the and of four
+                spots = [1.5, 3.5]
             elif style == "sparse":
-                spots = [3.5] if i % 2 == 0 else []
+                spots = [1.5, 3.5] if i % 2 == 0 else [3.5]
             elif style == "lone":
                 spots = [1.5] if i % 4 == 0 else []
             else:
                 spots = []
             for s in spots:
-                parts["stabs"] += [(b + s, 0.3, p, 92) for p in stab]
+                velocity = 100 if s in (1.5, 3.5) else 78
+                parts["stabs"] += [(b + s, 0.12, p, velocity) for p in stab + (stab[0] + 12,)]
 
             # -- metal: a cycle five sixteenths long, against the bar of sixteen
             style = plan.get("metal")
             if style == "cycle":
-                tones = [60, 61, 64, 60, 67, 61, 65, 72]     # C4 to C5: the pitch sets how bright the sheet rings
-                for k in range(int(4 / 1.25) + 1):
-                    start = k * 1.25 + (bar % 5) * 0.25
-                    if start < 4.0 and rng.random() < 0.8:
-                        parts["metal"].append((b + start, 0.1, tones[(bar * 3 + k) % len(tones)], rng.choice((84, 104, 124))))
+                tones = [48, 49, 52, 48, 55, 49, 53, 60]     # C3 to C4, a Phrygian Dominant set, struck hard
+                for cycle, period, lead in ((0, 1.25, 0.0), (1, 0.75, 0.5)):    # five sixteenths against three
+                    for k in range(int(4 / period) + 1):
+                        start = lead + k * period + (bar % 5) * 0.25 * (1 - cycle)
+                        if start < 4.0 and rng.random() < (0.8 if cycle == 0 else 0.5):
+                            parts["metal"].append((b + start, 0.1, tones[(bar * 3 + k + cycle) % len(tones)],
+                                                   rng.choice((90, 110, 127))))
             elif style == "anvil" and i % 2 == 0:
                 parts["metal"].append((b, 0.2, 36, 124))
 
@@ -136,7 +142,7 @@ def score():
 
 # part: circuit in the Valis repository
 JOBS = [("bass", "examples/dub-bass.ttl"), ("kit", "examples/909.ttl"), ("stabs", "examples/tonewheel-organ.ttl"),
-        ("metal", "examples/metal-bash.ttl"), ("bell", "examples/free-bell.ttl")]
+        ("metal", "examples/metal-clang.ttl"), ("bell", "examples/free-bell.ttl")]
 # stem: (effect circuit, result)
 RETURNS = [("stabs", "stabs-echo"), ("metal", "metal-echo")]
 
@@ -166,8 +172,8 @@ def render():
 
 
 # stem: (level in dB of the stem's playing rms, pan -1..1, high-pass Hz or 0)
-LEVELS = {"bass": (-19.0, 0.0, 28), "kit": (-23.0, 0.0, 0), "stabs": (-29.0, -0.25, 160), "stabs-echo": (-30.0, 0.35, 160),
-          "metal": (-23.0, 0.2, 120), "metal-echo": (-29.0, -0.4, 150), "bell": (-33.0, 0.0, 100)}
+LEVELS = {"bass": (-19.0, 0.0, 28), "kit": (-23.0, 0.0, 0), "stabs": (-26.0, -0.25, 160), "stabs-echo": (-27.0, 0.35, 160),
+          "metal": (-21.0, 0.2, 100), "metal-echo": (-27.0, -0.4, 150), "bell": (-33.0, 0.0, 100)}
 
 
 def playing_rms_db(x, rate):

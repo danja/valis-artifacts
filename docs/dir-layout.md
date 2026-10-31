@@ -4,6 +4,7 @@
 * docs/ : general documentation
 * sources/[track title]/ : any source material use in the construction of the artifacts, eg. midi files, requirement prompts etc.
 * artifacts/[track title]/README.md : a description of what's here for this track
+* artifacts/[track title]/circuits/ : Valis circuits used on the track
 * artifacts/[track title]/docs/ : track-specific documentation, plus lyrics and record sleeve images
 * artifacts/[track title]/wavs/ : wav rendering
 * artifacts/[track title]/midi/ : midi files
