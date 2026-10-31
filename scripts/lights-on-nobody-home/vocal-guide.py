@@ -20,7 +20,10 @@ sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
 import midiw
 
 BPM = 128
-RENDER = os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render")
+# Release is several times faster and renders the same samples; fall back to Debug when only that is built.
+RENDER = next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
+                           for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
+              os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
 NAMES = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 
 

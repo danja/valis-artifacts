@@ -9,6 +9,7 @@
 #   python3 track.py render   render every part to artifacts/lights-on-nobody-home/wavs/
 #   python3 track.py mix      mix the stems to artifacts/lights-on-nobody-home/mixes/
 #   python3 track.py          all three
+#   python3 track.py mix --lufs=-14   after mixing, scale to that integrated loudness (never past -1 dBTP)
 #
 # 128 bpm, 92 bars (about 2:53). Nothing in it is taken from another song: the melody and the patterns are new.
 import os, sys, random, subprocess
@@ -18,9 +19,13 @@ VALIS = os.environ.get("VALIS", "/chalet/github/valis")
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "lights-on-nobody-home"))
 MIDI, WAVS, MIXES = (os.path.join(OUTDIR, d) for d in ("midi", "wavs", "mixes"))
-RENDER = os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render")
+# Release is several times faster and renders the same samples; fall back to Debug when only that is built.
+RENDER = next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
+                           for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
+              os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
 sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
-import midiw
+sys.path.insert(0, os.path.join(VALIS, "scripts", "shot"))
+import midiw, lufs
 
 BPM = 128
 STEP = 0.25
@@ -369,7 +374,7 @@ def room(x, rate):
     return wet[:len(x)]
 
 
-def mix():
+def mix(target_lufs=None):
     import numpy as np
     from scipy.io import wavfile
     from scipy.signal import butter, sosfilt
@@ -396,11 +401,22 @@ def mix():
     total = total + room(total, rate) * 0.16
     mx = np.tanh(total * 1.6) / 1.6
     mx = mx / np.max(np.abs(mx)) * 10 ** (-1.0 / 20)
-    wavfile.write("%s/lights-on-nobody-home.wav" % MIXES, rate, (mx * 8388607).astype(np.int32) << 8)
+    out = "%s/lights-on-nobody-home.wav" % MIXES
+    wavfile.write(out, rate, (mx * 8388607).astype(np.int32) << 8)
+    if target_lufs is not None:
+        gain, limited = lufs.gain_to_target(out, target_lufs)
+        mx = mx * 10 ** (gain / 20)
+        wavfile.write(out, rate, (mx * 8388607).astype(np.int32) << 8)
+        print("loudness: gain %+.2f dB toward %.1f LUFS%s" % (gain, target_lufs, " (held back by the peak ceiling)" if limited else ""))
+        print("loudness now: %s" % lufs.measure(out))
     print("mixed: %.1f s, peak %.3f rms %.3f dB" % (len(mx) / rate, np.max(np.abs(mx)), 20 * np.log10(np.sqrt(np.mean(mx ** 2)))))
 
 
 if __name__ == "__main__":
     steps = [a for a in sys.argv[1:] if not a.startswith("--")] or ["score", "render", "mix"]
+    target = next((float(a.split("=", 1)[1]) for a in sys.argv[1:] if a.startswith("--lufs=")), None)
     for s in steps:
-        {"score": score, "render": render, "mix": mix}[s]()
+        if s == "mix":
+            mix(target)
+        else:
+            {"score": score, "render": render}[s]()

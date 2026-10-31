@@ -19,7 +19,10 @@ VALIS = os.environ.get("VALIS", "/chalet/github/valis")
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "autumn-leaves"))
 MIDI, WAVS, MIXES = (os.path.join(OUTDIR, d) for d in ("midi", "wavs", "mixes"))
-RENDER = os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render")
+# Release is several times faster and renders the same samples; fall back to Debug when only that is built.
+RENDER = next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
+                           for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
+              os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
 sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
 import midiw
 
