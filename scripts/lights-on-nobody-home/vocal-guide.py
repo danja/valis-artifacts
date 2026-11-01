@@ -16,7 +16,7 @@ import os, sys, subprocess
 VALIS = os.environ.get("VALIS", "/chalet/github/valis")
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "lights-on-nobody-home"))
-sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
+sys.path.insert(0, os.path.join(VALIS, "scripts", "song"))
 import midiw
 
 BPM = 128

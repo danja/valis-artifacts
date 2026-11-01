@@ -7,34 +7,28 @@
 #
 #   python3 track.py score    write one MIDI file per part to artifacts/autumn-leaves/midi/
 #   python3 track.py render   render every part to artifacts/autumn-leaves/wavs/ (a few minutes)
-#   python3 track.py mix      mix the stems to artifacts/autumn-leaves/mixes/autumn-leaves.wav
+#   python3 track.py mix      mix the stems to artifacts/autumn-leaves/mixes/ (--version=vN, --lufs=N, --arc)
 #   python3 track.py          all three
 #
 # G minor, 112 bpm, 144 bars (about 5:08). Two bars to a chord, sixteen bars to the cycle:
 # Cm7 F7 Bbmaj7 Ebmaj7 Am7b5 D7 Gm Gm.
-import os, sys, random, subprocess
-from concurrent.futures import ThreadPoolExecutor
+import os, sys, random
 
 VALIS = os.environ.get("VALIS", "/chalet/github/valis")
-HERE = os.path.dirname(os.path.abspath(__file__))
-OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "autumn-leaves"))
-MIDI, WAVS, MIXES = (os.path.join(OUTDIR, d) for d in ("midi", "wavs", "mixes"))
-# Release is several times faster and renders the same samples; fall back to Debug when only that is built.
-RENDER = next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
-                           for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
-              os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
-sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
-import midiw
+sys.path.insert(0, os.path.join(VALIS, "scripts", "song"))
+import midiw, songlib
 
-BPM = 112
+# The tempo, the sections and the mix are data in song.ttl (checked by the read_song tool). This file keeps the score.
+HERE = os.path.dirname(os.path.abspath(__file__))
+SONG = songlib.load(os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "autumn-leaves", "song.ttl")))
+MIDI = SONG.midi_dir
+BPM = SONG.tempo
 STEP = 0.25                      # a sixteenth, in beats
 SWING = 0.53                     # the second sixteenth of each pair, drums only
-SECTIONS = [("intro", 8), ("verse", 16), ("call", 16), ("jam", 32), ("break", 8),
-            ("return", 32), ("climax", 16), ("outro", 16)]
-BARS = sum(n for _, n in SECTIONS)
-SECONDS = BARS * 4 * 60 / BPM + 8
+SECTIONS = [(s.name, s.bars) for s in SONG.sections]
+BARS = SONG.bars
 DRUMS = ("kick", "drums", "perc")
-PARTS = ["kick", "drums", "perc", "bass", "organ", "horns", "lead"]
+PARTS = [p.name for p in SONG.parts]
 
 # Cm7 F7 Bbmaj7 Ebmaj7 Am7b5 D7 Gm Gm, two bars each
 ROOTS = [36, 41, 34, 39, 33, 38, 31, 31]
@@ -197,85 +191,17 @@ def score():
         print("%-12s %5d notes" % (part, len(notes)))
 
 
-JOBS = [("kick", "examples/dmx.ttl"), ("drums", "examples/dmx.ttl"), ("perc", "examples/dmx.ttl"),
-        ("bass", "examples/psych-bass.ttl"), ("organ", "examples/tonewheel-organ.ttl"),
-        ("horns", "examples/horn-section.ttl"), ("lead", "examples/fuzz-lead.ttl")]
-
-
-def run(cmd):
-    r = subprocess.run(cmd, cwd=VALIS, capture_output=True, text=True)
-    return r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:]
-
-
-def render_one(job):
-    part, circuit = job
-    print(part, run([RENDER, circuit, "--midi", "%s/%s.mid" % (MIDI, part), "--tempo", str(BPM), "--rolling",
-                     "--seconds", "%.1f" % SECONDS, "-o", "%s/%s.wav" % (WAVS, part)]), flush=True)
-
-
-def render():
-    os.makedirs(WAVS, exist_ok=True)
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        list(pool.map(render_one, JOBS))
-    # the organ goes through the rotating speaker, whose speed is a MIDI note
-    print("organ-leslie", run([RENDER, "examples/leslie.ttl", "-i", WAVS + "/organ.wav", "--midi", MIDI + "/leslie-speed.mid",
-                               "--tempo", str(BPM), "--rolling", "--seconds", "%.1f" % SECONDS, "-o", WAVS + "/organ-leslie.wav"]))
-
-
-# part: (level in dB of the stem's playing rms, pan -1..1, high-pass Hz or 0). The percussion follows the kit.
-FOLLOWS = {"perc"}
-LEVELS = {"kick": (-19.0, 0.0, 0), "drums": (-23.0, 0.0, 0), "perc": (-6.0, 0.15, 0),
-          "bass": (-20.0, 0.0, 0), "organ-leslie": (-25.0, -0.3, 110),
-          "horns": (-25.0, 0.3, 150), "lead": (-25.0, 0.1, 150)}
-
-
-def playing_rms_db(x, rate):
-    import numpy as np
-    w = rate // 10
-    n = len(x) // w
-    e = np.sqrt((x[:n * w].reshape(n, w) ** 2).mean(axis=1))
-    e = e[e > 1.0e-3]
-    return 20 * np.log10(np.sqrt((e ** 2).mean()) + 1.0e-12) if len(e) else -120.0
-
-
-def mix():
-    import numpy as np
-    from scipy.io import wavfile
-    from scipy.signal import butter, sosfilt
-    os.makedirs(MIXES, exist_ok=True)
-    total = None
-    kit_gain = 1.0
-    for part, (level, pan, hp) in LEVELS.items():
-        path = "%s/%s.wav" % (WAVS, part)
-        if not os.path.exists(path):
-            print("missing", path)
-            continue
-        rate, d = wavfile.read(path)
-        d = d.astype(np.float64) / (2.0 ** 31 if d.dtype == np.int32 else 32768.0 if d.dtype == np.int16 else 1.0)
-        mono = d if d.ndim == 1 else d.mean(axis=1)
-        if hp:
-            mono = sosfilt(butter(2, hp, "highpass", fs=rate, output="sos"), mono)
-        if part in FOLLOWS:
-            g = 10 ** (level / 20) * kit_gain
-        else:
-            g = 10 ** ((level - playing_rms_db(mono, rate)) / 20)
-            if part == "drums":
-                kit_gain = g
-        theta = (pan + 1) * np.pi / 4
-        stereo = np.stack([mono * np.cos(theta), mono * np.sin(theta)], axis=1) * g * np.sqrt(2)
-        if total is None:
-            total = np.zeros((max(len(stereo), int(SECONDS * rate)), 2))
-        total[:len(stereo)] += stereo
-    end = int((BARS * 4 * 60 / BPM + 4) * rate)             # the song, and the last chord's tail
-    total = total[:end]
-    total[-3 * rate:] *= np.linspace(1.0, 0.0, 3 * rate)[:, None]
-    mx = np.tanh(total * 1.8) / 1.8
-    mx = mx / np.max(np.abs(mx)) * 10 ** (-1.0 / 20)
-    wavfile.write("%s/autumn-leaves.wav" % MIXES, rate, (mx * 8388607).astype(np.int32) << 8)
-    print("mixed: %.1f s, peak %.3f rms %.3f dB" % (len(mx) / rate, np.max(np.abs(mx)), 20 * np.log10(np.sqrt(np.mean(mx ** 2)))))
-
-
 if __name__ == "__main__":
-    steps = [a for a in sys.argv[1:] if not a.startswith("--")] or ["score", "render", "mix"]
+    args = sys.argv[1:]
+    steps = [a for a in args if not a.startswith("--")] or ["score", "render", "mix"]
+    option = lambda name, default=None: next((a.split("=", 1)[1] for a in args if a.startswith(name + "=")), default)
     for s in steps:
-        {"score": score, "render": render, "mix": mix}[s]()
+        if s == "score":
+            score()
+        elif s == "render":
+            only = option("--only")
+            songlib.render(SONG, only.split(",") if only else None, workers=4)
+        elif s == "mix":
+            lufs = option("--lufs")
+            songlib.mix(SONG, option("--version", "v1"), float(lufs) if lufs else None, arc="--arc" in args,
+                        overwrite="--overwrite" in args)

@@ -14,7 +14,6 @@
 import os, sys, random
 
 VALIS = os.environ.get("VALIS", "/chalet/github/valis")
-sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
 sys.path.insert(0, os.path.join(VALIS, "scripts", "song"))
 import midiw, songlib
 

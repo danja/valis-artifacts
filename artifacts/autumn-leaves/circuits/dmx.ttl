@@ -1,0 +1,352 @@
+# examples/dmx.ttl
+#
+# The Oberheim DMX.
+#
+# The DMX was not an analogue drum machine. It played 8-bit samples out of ROM,
+# which is why it sounds the way it does and why modelling it means playing the
+# samples rather than synthesising an imitation of them. The recordings in
+# audio/oberheim-dmx are captures of the real machine, so its converters, its
+# companding and its output stage are already in them.
+#
+# The machine is eight voices, not eighteen sounds. Each voice is a plug-in card
+# carrying up to three variations of one instrument, and the eight cards are
+# BASS, SNARE, HIHAT, TOM 1, TOM 2, CYMBAL, PERC 1 and PERC 2. That is where the
+# controls belong: each card has one tuning trimmer and one of the machine's
+# eight separate outputs, so level, pan and tune are per card rather than per
+# sound. Two sounds on the same card share all three, because on the real
+# machine they share the card.
+#
+# https://en.wikipedia.org/wiki/Oberheim_DMX
+#
+# The DMX chose between a card's variations by accent rather than by note. Here
+# each variation has its own General MIDI note instead, which plays from any
+# drum pattern without remapping.
+#
+# TOM 2 carries the timbale card, which was one of the swaps Oberheim sold.
+# Where a card has fewer captures than the three variations it could hold, the
+# spare slot is left empty and is silent.
+#
+# Tuning is a playback rate, which is how the DMX did it too: its pitch controls
+# changed the rate the sample was clocked out at, so a tuned-down snare gets
+# longer as well as lower. That is the sound, not a shortcoming.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis:dmx#> .
+
+################################################################
+# One voice card                                               #
+#                                                              #
+# Three sounds, one tuning trimmer across all of them, one      #
+# level and one pan: the card's own output.                     #
+################################################################
+
+:Voice a val:Subcircuit ;
+    rdfs:label "DMX voice card" ;
+
+    lv2:port [ a lv2:OutputPort , lv2:AudioPort ; lv2:symbol "left" ;
+               val:node :place ; val:port "left" ] ,
+
+             [ a lv2:OutputPort , lv2:AudioPort ; lv2:symbol "right" ;
+               val:node :place ; val:port "right" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "noteA" ;
+               lv2:name "Note A" ; lv2:default 0.0 ;
+               lv2:minimum 0.0 ; lv2:maximum 127.0 ; lv2:portProperty lv2:integer ;
+               val:node :gateA ; val:port "note" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "noteB" ;
+               lv2:name "Note B" ; lv2:default 0.0 ;
+               lv2:minimum 0.0 ; lv2:maximum 127.0 ; lv2:portProperty lv2:integer ;
+               val:node :gateB ; val:port "note" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "noteC" ;
+               lv2:name "Note C" ; lv2:default 0.0 ;
+               lv2:minimum 0.0 ; lv2:maximum 127.0 ; lv2:portProperty lv2:integer ;
+               val:node :gateC ; val:port "note" ] ,
+
+             # One trimmer on the card, so it reaches every sound on it.
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "tune" ;
+               lv2:name "Tune" ; lv2:default 1.0 ;
+               lv2:minimum 0.5 ; lv2:maximum 2.0 ;
+               val:node :playA , :playB , :playC ; val:port "speed" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "level" ;
+               lv2:name "Level" ; lv2:default 0.0 ;
+               lv2:minimum -60.0 ; lv2:maximum 12.0 ; units:unit units:db ;
+               val:node :amp ; val:port "gain" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ; lv2:symbol "pan" ;
+               lv2:name "Pan" ; lv2:default 0.0 ;
+               lv2:minimum -1.0 ; lv2:maximum 1.0 ;
+               val:node :place ; val:port "pan" ] ;
+
+    val:option [ lv2:symbol "fileA" ; val:node :playA ; val:property val:file ] ,
+               [ lv2:symbol "fileB" ; val:node :playB ; val:property val:file ] ,
+               [ lv2:symbol "fileC" ; val:node :playC ; val:property val:file ] ;
+
+    val:element :gateA , :gateB , :gateC , :playA , :playB , :playC ,
+                :chokeA , :chokeB , :chokeC , :sum , :amp , :place ;
+    val:arc :trigA , :trigB , :trigC , :sumA , :sumB , :sumC , :toAmp , :toPan ,
+            :bToChokeA , :cToChokeA , :aToChokeB , :cToChokeB , :aToChokeC , :bToChokeC ,
+            :chokeToA , :chokeToB , :chokeToC .
+
+:gateA a val:NoteGate .
+:gateB a val:NoteGate .
+:gateC a val:NoteGate .
+
+:playA a val:SampleLoad ; val:loop 0.0 .
+:playB a val:SampleLoad ; val:loop 0.0 .
+:playC a val:SampleLoad ; val:loop 0.0 .
+
+# The card plays one sound at a time, so a sound starting cuts off the other two. Each
+# sound is choked by the gates of the others, and a note's own gate never reaches its own
+# choke, so a repeated note restarts rather than stopping.
+:chokeA a val:ControlMax .
+:chokeB a val:ControlMax .
+:chokeC a val:ControlMax .
+
+:bToChokeA a val:Arc ; val:from [ val:node :gateB ; val:port "gate" ] ; val:to [ val:node :chokeA ; val:port "a" ] .
+:cToChokeA a val:Arc ; val:from [ val:node :gateC ; val:port "gate" ] ; val:to [ val:node :chokeA ; val:port "b" ] .
+:aToChokeB a val:Arc ; val:from [ val:node :gateA ; val:port "gate" ] ; val:to [ val:node :chokeB ; val:port "a" ] .
+:cToChokeB a val:Arc ; val:from [ val:node :gateC ; val:port "gate" ] ; val:to [ val:node :chokeB ; val:port "b" ] .
+:aToChokeC a val:Arc ; val:from [ val:node :gateA ; val:port "gate" ] ; val:to [ val:node :chokeC ; val:port "a" ] .
+:bToChokeC a val:Arc ; val:from [ val:node :gateB ; val:port "gate" ] ; val:to [ val:node :chokeC ; val:port "b" ] .
+
+:chokeToA a val:Arc ; val:from [ val:node :chokeA ; val:port "out" ] ; val:to [ val:node :playA ; val:port "choke" ] .
+:chokeToB a val:Arc ; val:from [ val:node :chokeB ; val:port "out" ] ; val:to [ val:node :playB ; val:port "choke" ] .
+:chokeToC a val:Arc ; val:from [ val:node :chokeC ; val:port "out" ] ; val:to [ val:node :playC ; val:port "choke" ] .
+
+:sum a val:Mixer .
+:amp a val:Gain .
+:place a val:Pan .
+
+:trigA a val:Arc ; val:from [ val:node :gateA ; val:port "gate"    ] ;
+                   val:to   [ val:node :playA ; val:port "trigger" ] .
+:trigB a val:Arc ; val:from [ val:node :gateB ; val:port "gate"    ] ;
+                   val:to   [ val:node :playB ; val:port "trigger" ] .
+:trigC a val:Arc ; val:from [ val:node :gateC ; val:port "gate"    ] ;
+                   val:to   [ val:node :playC ; val:port "trigger" ] .
+
+:sumA a val:Arc ; val:from [ val:node :playA ; val:port "out" ] ;
+                  val:to   [ val:node :sum   ; val:port "in"  ] .
+:sumB a val:Arc ; val:from [ val:node :playB ; val:port "out" ] ;
+                  val:to   [ val:node :sum   ; val:port "in"  ] .
+:sumC a val:Arc ; val:from [ val:node :playC ; val:port "out" ] ;
+                  val:to   [ val:node :sum   ; val:port "in"  ] .
+
+:toAmp a val:Arc ; val:from [ val:node :sum ; val:port "out" ] ;
+                   val:to   [ val:node :amp ; val:port "in"  ] .
+:toPan a val:Arc ; val:from [ val:node :amp   ; val:port "out" ] ;
+                   val:to   [ val:node :place ; val:port "in"  ] .
+
+################################################################
+# The eight cards                                              #
+################################################################
+
+:dmx a val:Circuit , trn:PluginProfile ;
+    trn:role trn:DrumInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    trn:genre "Hip Hop", "Electro", "Pop" ;
+    trn:caution """Each voice card is monophonic, as on the real machine: a sound starting cuts off the others on its card, so a closed hi-hat stops an open one. The cut is a 2 ms fade, and the stop is found once per control slice (32 samples).""" ;
+    rdfs:label "Oberheim DMX" ;
+    val:element :bass , :snare , :hihat , :tom1 , :tom2 , :cymbal , :perc1 , :perc2 ,
+                :mix , :driveL , :driveR , :out ;
+    val:arc :bassL , :bassR , :snareL , :snareR , :hihatL , :hihatR , :tom1L , :tom1R , :tom2L , :tom2R , :cymbalL , :cymbalR , :perc1L , :perc1R , :perc2L , :perc2R ,
+            :mixL , :mixR , :outL , :outR .
+
+# Bass
+:bass a :Voice ; val:level 0.0 ; val:pan 0.0 ;
+    val:noteA 36.0 ;
+    val:fileA "audio/oberheim-dmx/Kick01.wav" ;   # Bass drum
+    val:noteB 35.0 ;
+    val:fileB "audio/oberheim-dmx/Kick02.wav" .   # Bass drum, softer
+
+# Snare
+:snare a :Voice ; val:level 0.0 ; val:pan -0.05 ;
+    val:noteA 38.0 ;
+    val:fileA "audio/oberheim-dmx/Snare01.wav" ;   # Snare
+    val:noteB 40.0 ;
+    val:fileB "audio/oberheim-dmx/Snare02.wav" ;   # Snare, softer
+    val:noteC 31.0 ;
+    val:fileC "audio/oberheim-dmx/Snare03.wav" .   # Snare, softest
+
+# Hi-hat
+:hihat a :Voice ; val:level -3.0 ; val:pan -0.35 ;
+    val:noteA 42.0 ;
+    val:fileA "audio/oberheim-dmx/Hat_C.wav" ;   # Closed
+    val:noteB 46.0 ;
+    val:fileB "audio/oberheim-dmx/Hat_O.wav" .   # Open
+
+# Tom 1
+:tom1 a :Voice ; val:level -1.0 ; val:pan 0.2 ;
+    val:noteA 48.0 ;
+    val:fileA "audio/oberheim-dmx/TomHi.wav" ;   # High
+    val:noteB 47.0 ;
+    val:fileB "audio/oberheim-dmx/TomMid.wav" ;   # Mid
+    val:noteC 45.0 ;
+    val:fileC "audio/oberheim-dmx/TomLo.wav" .   # Low
+
+# Tom 2
+:tom2 a :Voice ; val:level -2.0 ; val:pan -0.3 ;
+    val:noteA 65.0 ;
+    val:fileA "audio/oberheim-dmx/TimbaleHi.wav" ;   # High timbale
+    val:noteB 66.0 ;
+    val:fileB "audio/oberheim-dmx/TimbaleLo.wav" .   # Low timbale
+
+# Cymbal
+:cymbal a :Voice ; val:level -4.0 ; val:pan 0.5 ;
+    val:noteA 51.0 ;
+    val:fileA "audio/oberheim-dmx/Ride.wav" ;   # Ride
+    val:noteB 49.0 ;
+    val:fileB "audio/oberheim-dmx/Crash.wav" .   # Crash
+
+# Perc 1
+:perc1 a :Voice ; val:level -2.0 ; val:pan 0.35 ;
+    val:noteA 54.0 ;
+    val:fileA "audio/oberheim-dmx/Tamborine.wav" ;   # Tambourine
+    val:noteB 37.0 ;
+    val:fileB "audio/oberheim-dmx/Rim.wav" .   # Rimshot
+
+# Perc 2
+:perc2 a :Voice ; val:level -3.0 ; val:pan 0.6 ;
+    val:noteA 69.0 ;
+    val:fileA "audio/oberheim-dmx/Cabasa.wav" ;   # Shaker
+    val:noteB 39.0 ;
+    val:fileB "audio/oberheim-dmx/Clap.wav" .   # Hand clap
+
+:bassL a val:Arc ; val:from [ val:node :bass ; val:port "left" ] ;
+                val:to   [ val:node :mix ; val:port "left" ] .
+:bassR a val:Arc ; val:from [ val:node :bass ; val:port "right" ] ;
+                val:to   [ val:node :mix ; val:port "right" ] .
+:snareL a val:Arc ; val:from [ val:node :snare ; val:port "left" ] ;
+                 val:to   [ val:node :mix ; val:port "left" ] .
+:snareR a val:Arc ; val:from [ val:node :snare ; val:port "right" ] ;
+                 val:to   [ val:node :mix ; val:port "right" ] .
+:hihatL a val:Arc ; val:from [ val:node :hihat ; val:port "left" ] ;
+                 val:to   [ val:node :mix ; val:port "left" ] .
+:hihatR a val:Arc ; val:from [ val:node :hihat ; val:port "right" ] ;
+                 val:to   [ val:node :mix ; val:port "right" ] .
+:tom1L a val:Arc ; val:from [ val:node :tom1 ; val:port "left" ] ;
+                val:to   [ val:node :mix ; val:port "left" ] .
+:tom1R a val:Arc ; val:from [ val:node :tom1 ; val:port "right" ] ;
+                val:to   [ val:node :mix ; val:port "right" ] .
+:tom2L a val:Arc ; val:from [ val:node :tom2 ; val:port "left" ] ;
+                val:to   [ val:node :mix ; val:port "left" ] .
+:tom2R a val:Arc ; val:from [ val:node :tom2 ; val:port "right" ] ;
+                val:to   [ val:node :mix ; val:port "right" ] .
+:cymbalL a val:Arc ; val:from [ val:node :cymbal ; val:port "left" ] ;
+                  val:to   [ val:node :mix ; val:port "left" ] .
+:cymbalR a val:Arc ; val:from [ val:node :cymbal ; val:port "right" ] ;
+                  val:to   [ val:node :mix ; val:port "right" ] .
+:perc1L a val:Arc ; val:from [ val:node :perc1 ; val:port "left" ] ;
+                 val:to   [ val:node :mix ; val:port "left" ] .
+:perc1R a val:Arc ; val:from [ val:node :perc1 ; val:port "right" ] ;
+                 val:to   [ val:node :mix ; val:port "right" ] .
+:perc2L a val:Arc ; val:from [ val:node :perc2 ; val:port "left" ] ;
+                 val:to   [ val:node :mix ; val:port "left" ] .
+:perc2R a val:Arc ; val:from [ val:node :perc2 ; val:port "right" ] ;
+                 val:to   [ val:node :mix ; val:port "right" ] .
+
+:mix a val:Mixer .
+
+# Eight cards can all land on the same beat, so each side leans on a soft stage
+# rather than clipping. The DMX's own output was not clean either. One knob
+# drives both, because two halves of a stereo pair that drift apart are a fault
+# rather than a control.
+:driveL a val:Tanh ; val:gain 1.4 ; val:antialiasing val:ADAA2 .
+:driveR a val:Tanh ; val:gain 1.4 ; val:antialiasing val:ADAA2 .
+
+:out a val:Output .
+
+:mixL a val:Arc ; val:from [ val:node :mix    ; val:port "left" ] ;
+                  val:to   [ val:node :driveL ; val:port "in"   ] .
+:mixR a val:Arc ; val:from [ val:node :mix    ; val:port "right" ] ;
+                  val:to   [ val:node :driveR ; val:port "in"    ] .
+:outL a val:Arc ; val:from [ val:node :driveL ; val:port "out"  ] ;
+                  val:to   [ val:node :out    ; val:port "left" ] .
+:outR a val:Arc ; val:from [ val:node :driveR ; val:port "out"   ] ;
+                  val:to   [ val:node :out    ; val:port "right" ] .
+
+################################################################
+# Controls: one strip per card, as the eight outputs were       #
+################################################################
+
+:p0 a val:Param ; val:slot 0 ; val:target :bass ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "bassLevel" ; units:unit units:db ; val:section "Bass" .
+
+:p1 a val:Param ; val:slot 1 ; val:target :bass ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "bassPan" ; val:section "Bass" .
+
+:p2 a val:Param ; val:slot 2 ; val:target :bass ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "bassTune" ; val:section "Bass" .
+
+:p3 a val:Param ; val:slot 3 ; val:target :snare ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "snareLevel" ; units:unit units:db ; val:section "Snare" .
+
+:p4 a val:Param ; val:slot 4 ; val:target :snare ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "snarePan" ; val:section "Snare" .
+
+:p5 a val:Param ; val:slot 5 ; val:target :snare ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "snareTune" ; val:section "Snare" .
+
+:p6 a val:Param ; val:slot 6 ; val:target :hihat ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "hihatLevel" ; units:unit units:db ; val:section "Hi-hat" .
+
+:p7 a val:Param ; val:slot 7 ; val:target :hihat ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "hihatPan" ; val:section "Hi-hat" .
+
+:p8 a val:Param ; val:slot 8 ; val:target :hihat ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "hihatTune" ; val:section "Hi-hat" .
+
+:p9 a val:Param ; val:slot 9 ; val:target :tom1 ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "tom1Level" ; units:unit units:db ; val:section "Tom 1" .
+
+:p10 a val:Param ; val:slot 10 ; val:target :tom1 ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "tom1Pan" ; val:section "Tom 1" .
+
+:p11 a val:Param ; val:slot 11 ; val:target :tom1 ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "tom1Tune" ; val:section "Tom 1" .
+
+:p12 a val:Param ; val:slot 12 ; val:target :tom2 ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "tom2Level" ; units:unit units:db ; val:section "Tom 2" .
+
+:p13 a val:Param ; val:slot 13 ; val:target :tom2 ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "tom2Pan" ; val:section "Tom 2" .
+
+:p14 a val:Param ; val:slot 14 ; val:target :tom2 ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "tom2Tune" ; val:section "Tom 2" .
+
+:p15 a val:Param ; val:slot 15 ; val:target :cymbal ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "cymbalLevel" ; units:unit units:db ; val:section "Cymbal" .
+
+:p16 a val:Param ; val:slot 16 ; val:target :cymbal ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "cymbalPan" ; val:section "Cymbal" .
+
+:p17 a val:Param ; val:slot 17 ; val:target :cymbal ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "cymbalTune" ; val:section "Cymbal" .
+
+:p18 a val:Param ; val:slot 18 ; val:target :perc1 ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "perc1Level" ; units:unit units:db ; val:section "Perc 1" .
+
+:p19 a val:Param ; val:slot 19 ; val:target :perc1 ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "perc1Pan" ; val:section "Perc 1" .
+
+:p20 a val:Param ; val:slot 20 ; val:target :perc1 ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "perc1Tune" ; val:section "Perc 1" .
+
+:p21 a val:Param ; val:slot 21 ; val:target :perc2 ; val:property val:level ;
+    lv2:name "Level" ; lv2:symbol "perc2Level" ; units:unit units:db ; val:section "Perc 2" .
+
+:p22 a val:Param ; val:slot 22 ; val:target :perc2 ; val:property val:pan ;
+    lv2:name "Pan" ; lv2:symbol "perc2Pan" ; val:section "Perc 2" .
+
+:p23 a val:Param ; val:slot 23 ; val:target :perc2 ; val:property val:tune ;
+    lv2:name "Tune" ; lv2:symbol "perc2Tune" ; val:section "Perc 2" .
+
+:p24 a val:Param ; val:slot 24 ; val:target :driveL , :driveR ; val:property val:gain ;
+    lv2:name "Output drive" ; lv2:symbol "drive" ; val:section "Output" .

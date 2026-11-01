@@ -1,0 +1,42 @@
+# song.ttl
+#
+# "Lights On, Nobody Home": the layout and the mix as data. The notes are in midi/, played by the circuits in
+# circuits/ (copies of the Valis examples as they were when the song was made). Check it with the read_song tool;
+# scripts/lights-on-nobody-home/track.py reads it for the tempo, the sections and the mix, and keeps only the score.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:lights-on-nobody-home#> .
+
+:song a val:Song ;
+    val:title "Lights On, Nobody Home" ;
+    val:tempo 128 ;
+    val:fadeSeconds 3 ;
+    val:roomAmount 0.16 ;
+    val:roomDecay 0.28 ;
+    val:roomLowpass 5500 ;
+    val:drive 1.6 ;
+    val:hasSection :intro , :verse1 , :pre1 , :chorus1 , :verse2 , :pre2 , :chorus2 , :bridge , :chorus3 , :outro ;
+    val:hasPart :shakers , :congas , :kit , :guitarron , :vihuela , :guitar , :harp , :trumpets , :violins .
+
+# Sections. The old mix had one gain for the whole song, so every section is 0 dB.
+:intro   a val:Section ; val:index 1  ; val:bars 8  .
+:verse1  a val:Section ; val:index 2  ; val:bars 16 .
+:pre1    a val:Section ; val:index 3  ; val:bars 4  .
+:chorus1 a val:Section ; val:index 4  ; val:bars 8  .
+:verse2  a val:Section ; val:index 5  ; val:bars 16 .
+:pre2    a val:Section ; val:index 6  ; val:bars 4  .
+:chorus2 a val:Section ; val:index 7  ; val:bars 8  .
+:bridge  a val:Section ; val:index 8  ; val:bars 8  .
+:chorus3 a val:Section ; val:index 9  ; val:bars 16 .
+:outro   a val:Section ; val:index 10 ; val:bars 4  .
+
+:shakers   a val:Part ; val:index 1 ; val:circuit "circuits/latin-perc.ttl"  ; val:level -31 ; val:pan  0.2  ; val:highpass 200 .
+:congas    a val:Part ; val:index 2 ; val:circuit "circuits/latin-perc.ttl"  ; val:level -28 ; val:pan -0.2  ; val:highpass 90 .
+:kit       a val:Part ; val:index 3 ; val:circuit "circuits/latin-perc.ttl"  ; val:level -24 ; val:pan  0.0 .
+:guitarron a val:Part ; val:index 4 ; val:circuit "circuits/guitarron.ttl"    ; val:level -21 ; val:pan  0.0 .
+:vihuela   a val:Part ; val:index 5 ; val:circuit "circuits/nylon-guitar.ttl" ; val:level -27 ; val:pan  0.4  ; val:highpass 150 .
+:guitar    a val:Part ; val:index 6 ; val:circuit "circuits/nylon-guitar.ttl" ; val:level -27 ; val:pan -0.4  ; val:highpass 100 .
+:harp      a val:Part ; val:index 7 ; val:circuit "circuits/harp.ttl"         ; val:level -29 ; val:pan -0.15 ; val:highpass 100 .
+:trumpets  a val:Part ; val:index 8 ; val:circuit "circuits/trumpets.ttl"     ; val:level -25 ; val:pan  0.1  ; val:highpass 150 .
+:violins   a val:Part ; val:index 9 ; val:circuit "circuits/violins.ttl"      ; val:level -30 ; val:pan -0.3  ; val:highpass 140 .

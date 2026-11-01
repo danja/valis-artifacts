@@ -1,0 +1,44 @@
+# song.ttl
+#
+# "Autumn Leaves" as acid rock: the layout and the mix as data. The notes are in midi/, played by the circuits in
+# circuits/ (copies of the Valis examples as they were when the song was made). Check it with the read_song tool;
+# scripts/autumn-leaves/track.py reads it for the tempo, the sections and the mix, and keeps only the score.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:autumn-leaves#> .
+
+:song a val:Song ;
+    val:title "Autumn Leaves" ;
+    val:tempo 112 ;
+    val:fadeSeconds 3 ;
+    val:roomAmount 0 ;
+    val:drive 1.8 ;
+    val:hasSection :intro , :verse , :call , :jam , :break , :return , :climax , :outro ;
+    val:hasPart :kick , :drums , :perc , :bass , :organ , :horns , :lead ;
+    val:hasReturn :organ-leslie .
+
+# The old mix had one gain for the whole song, so every section is 0 dB.
+:intro  a val:Section ; val:index 1 ; val:bars 8  .
+:verse  a val:Section ; val:index 2 ; val:bars 16 .
+:call   a val:Section ; val:index 3 ; val:bars 16 .
+:jam    a val:Section ; val:index 4 ; val:bars 32 .
+:break  a val:Section ; val:index 5 ; val:bars 8  .
+:return a val:Section ; val:index 6 ; val:bars 32 .
+:climax a val:Section ; val:index 7 ; val:bars 16 .
+:outro  a val:Section ; val:index 8 ; val:bars 16 .
+
+:kick  a val:Part ; val:index 1 ; val:circuit "circuits/dmx.ttl"           ; val:level -19 ; val:pan  0.0 .
+:drums a val:Part ; val:index 2 ; val:circuit "circuits/dmx.ttl"           ; val:level -23 ; val:pan  0.0 .
+# The percussion is sparse, so it takes the drums' gain: 6 dB under the drums' level, as it was played.
+:perc  a val:Part ; val:index 3 ; val:circuit "circuits/dmx.ttl"           ; val:level -29 ; val:pan  0.15 ; val:follows :drums .
+:bass  a val:Part ; val:index 4 ; val:circuit "circuits/psych-bass.ttl"    ; val:level -20 ; val:pan  0.0 .
+:horns a val:Part ; val:index 6 ; val:circuit "circuits/horn-section.ttl"  ; val:level -25 ; val:pan  0.3  ; val:highpass 150 .
+:lead  a val:Part ; val:index 7 ; val:circuit "circuits/fuzz-lead.ttl"     ; val:level -25 ; val:pan  0.1  ; val:highpass 150 .
+
+# The dry organ is only the input of the rotating speaker, so it is rendered but not mixed.
+:organ a val:Part ; val:index 5 ; val:circuit "circuits/tonewheel-organ.ttl" ; val:silent true .
+
+# The rotating speaker is played too: its speed switch is MIDI note 60.
+:organ-leslie a val:Return ; val:source :organ ; val:circuit "circuits/leslie.ttl" ; val:midi "midi/leslie-speed.mid" ;
+    val:level -25 ; val:pan -0.3 ; val:highpass 110 .
