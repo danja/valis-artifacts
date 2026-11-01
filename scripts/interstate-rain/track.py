@@ -219,4 +219,5 @@ if __name__ == "__main__":
             songlib.render(SONG, only.split(",") if only else None)
         elif s == "mix":
             lufs = option("--lufs")
-            songlib.mix(SONG, option("--version", "v1"), float(lufs) if lufs else None, arc="--arc" in args)
+            songlib.mix(SONG, option("--version", "v1"), float(lufs) if lufs else None, arc="--arc" in args,
+                        overwrite="--overwrite" in args)

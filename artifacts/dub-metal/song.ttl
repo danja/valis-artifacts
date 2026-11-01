@@ -1,0 +1,39 @@
+# song.ttl
+#
+# "dub-metal" (working title): the layout and the mix as data. The notes are in midi/, played by the circuits in
+# circuits/ (copies of the Valis examples as they were when the stems were rendered). Check it with the read_song tool;
+# scripts/dub-metal/track.py reads it for the tempo, the sections and the mix, and keeps only the score.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:dub-metal#> .
+
+:song a val:Song ;
+    val:title "dub-metal" ;
+    val:tempo 85 ;
+    val:fadeSeconds 3 ;
+    val:roomAmount 0.12 ;
+    val:drive 1.5 ;
+    val:hasSection :intro , :groove , :bash , :dub , :peak , :outro ;
+    val:hasPart :bass , :kit , :stabs , :metal , :bell ;
+    val:hasReturn :stabs-echo , :metal-echo .
+
+# Sections. val:level is the gain of the whole mix while the section plays: the breakdown quieter, the peak louder.
+:intro  a val:Section ; val:index 1 ; val:bars 8  ; val:level -3.0 .
+:groove a val:Section ; val:index 2 ; val:bars 16 ; val:level  0.0 .
+:bash   a val:Section ; val:index 3 ; val:bars 16 ; val:level  1.0 .
+:dub    a val:Section ; val:index 4 ; val:bars 8  ; val:level -4.0 .
+:peak   a val:Section ; val:index 5 ; val:bars 16 ; val:level  2.5 .
+:outro  a val:Section ; val:index 6 ; val:bars 8  ; val:level -3.0 .
+
+:bass  a val:Part ; val:index 1 ; val:circuit "circuits/dub-bass.ttl"        ; val:level -19 ; val:pan  0.0  ; val:highpass 28 .
+:kit   a val:Part ; val:index 2 ; val:circuit "circuits/909.ttl"             ; val:level -23 ; val:pan  0.0 .
+:stabs a val:Part ; val:index 3 ; val:circuit "circuits/tonewheel-organ.ttl" ; val:level -26 ; val:pan -0.25 ; val:highpass 160 .
+:metal a val:Part ; val:index 4 ; val:circuit "circuits/metal-clang.ttl"     ; val:level -21 ; val:pan  0.2  ; val:highpass 100 .
+:bell  a val:Part ; val:index 5 ; val:circuit "circuits/free-bell.ttl"       ; val:level -33 ; val:pan  0.0  ; val:highpass 100 .
+
+# Returns: a part's stem through the dub delay.
+:stabs-echo a val:Return ; val:index 1 ; val:source :stabs ; val:circuit "circuits/dub-delay.ttl" ;
+    val:level -27 ; val:pan  0.35 ; val:highpass 160 .
+:metal-echo a val:Return ; val:index 2 ; val:source :metal ; val:circuit "circuits/dub-delay.ttl" ;
+    val:level -27 ; val:pan -0.4  ; val:highpass 150 .
