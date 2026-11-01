@@ -1,0 +1,135 @@
+# riser.ttl
+# 
+# A build-up. While a note is held, noise through a band-pass opens from a low rumble to a hiss, and a saw
+# climbs in pitch under it, both over the envelope's 5 second attack, so a note held for four bars (5.6 s at 170 bpm)
+# ends at the top. The note's pitch is ignored.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis-artifacts:street-hammer:riser#> .
+
+:riser a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    rdfs:label "Riser" ;
+    val:element :rise , :noise , :sweep , :bp , :noiseVca , :noiseLevel , :climb , :saw , :sawVca , :sawLevel , :mix , :limit , :out ;
+    val:arc :a_rise_out__sweep_in ,
+        :a_sweep_out__bp_cutoff ,
+        :a_noise_out__bp_in ,
+        :a_bp_bp__noiseVca_in ,
+        :a_rise_out__noiseVca_cv ,
+        :a_noiseVca_out__noiseLevel_in ,
+        :a_noiseLevel_out__mix_in ,
+        :a_rise_out__climb_in ,
+        :a_climb_out__saw_frequency ,
+        :a_saw_out__sawVca_in ,
+        :a_rise_out__sawVca_cv ,
+        :a_sawVca_out__sawLevel_in ,
+        :a_sawLevel_out__mix_in ,
+        :a_mix_out__limit_in ,
+        :a_limit_out__out_in .
+
+:rise a val:Envelope ;
+    val:attack 5000.0 ;
+    val:decay 20.0 ;
+    val:sustain 1.0 ;
+    val:release 150.0 .
+
+:noise a val:Noise ;
+    val:colour 0.2 .
+
+:sweep a val:Scale ;
+    val:min 250.0 ;
+    val:max 11000.0 .
+
+:bp a val:StateVariable ;
+    val:resonance 2.5 ;
+    val:drive 1.0 .
+
+:noiseVca a val:VCA .
+
+:noiseLevel a val:Gain ;
+    val:gain -6.0 .
+
+:climb a val:Scale ;
+    val:min 90.0 ;
+    val:max 2400.0 .
+
+:saw a val:Oscillator ;
+    val:shape 1 .
+
+:sawVca a val:VCA .
+
+:sawLevel a val:Gain ;
+    val:gain -14.0 .
+
+:mix a val:Mixer .
+
+:limit a val:Limiter ;
+    val:ceiling -1.0 .
+
+:out a val:Output .
+
+:a_rise_out__sweep_in a val:ControlArc ;
+    val:from [ val:node :rise ; val:port "out" ] ;
+    val:to   [ val:node :sweep ; val:port "in" ] .
+
+:a_sweep_out__bp_cutoff a val:ControlArc ;
+    val:from [ val:node :sweep ; val:port "out" ] ;
+    val:to   [ val:node :bp ; val:port "cutoff" ] .
+
+:a_noise_out__bp_in a val:Arc ;
+    val:from [ val:node :noise ; val:port "out" ] ;
+    val:to   [ val:node :bp ; val:port "in" ] .
+
+:a_bp_bp__noiseVca_in a val:Arc ;
+    val:from [ val:node :bp ; val:port "bp" ] ;
+    val:to   [ val:node :noiseVca ; val:port "in" ] .
+
+:a_rise_out__noiseVca_cv a val:ControlArc ;
+    val:from [ val:node :rise ; val:port "out" ] ;
+    val:to   [ val:node :noiseVca ; val:port "cv" ] .
+
+:a_noiseVca_out__noiseLevel_in a val:Arc ;
+    val:from [ val:node :noiseVca ; val:port "out" ] ;
+    val:to   [ val:node :noiseLevel ; val:port "in" ] .
+
+:a_noiseLevel_out__mix_in a val:Arc ;
+    val:from [ val:node :noiseLevel ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_rise_out__climb_in a val:ControlArc ;
+    val:from [ val:node :rise ; val:port "out" ] ;
+    val:to   [ val:node :climb ; val:port "in" ] .
+
+:a_climb_out__saw_frequency a val:ControlArc ;
+    val:from [ val:node :climb ; val:port "out" ] ;
+    val:to   [ val:node :saw ; val:port "frequency" ] .
+
+:a_saw_out__sawVca_in a val:Arc ;
+    val:from [ val:node :saw ; val:port "out" ] ;
+    val:to   [ val:node :sawVca ; val:port "in" ] .
+
+:a_rise_out__sawVca_cv a val:ControlArc ;
+    val:from [ val:node :rise ; val:port "out" ] ;
+    val:to   [ val:node :sawVca ; val:port "cv" ] .
+
+:a_sawVca_out__sawLevel_in a val:Arc ;
+    val:from [ val:node :sawVca ; val:port "out" ] ;
+    val:to   [ val:node :sawLevel ; val:port "in" ] .
+
+:a_sawLevel_out__mix_in a val:Arc ;
+    val:from [ val:node :sawLevel ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_mix_out__limit_in a val:Arc ;
+    val:from [ val:node :mix ; val:port "out" ] ;
+    val:to   [ val:node :limit ; val:port "in" ] .
+
+:a_limit_out__out_in a val:Arc ;
+    val:from [ val:node :limit ; val:port "out" ] ;
+    val:to   [ val:node :out ; val:port "in" ] .

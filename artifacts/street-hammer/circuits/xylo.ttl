@@ -1,0 +1,81 @@
+# xylo.ttl
+# 
+# A struck bar: a short burst of noise, softened by a low-pass, strikes a val:ModalBank in marimba mode (the
+# modes of a bar, not a string). A short ring, so a fast ostinato stays separate notes.
+# See also examples/modal-tom.ttl, which this is cut down from.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis-artifacts:street-hammer:xylo#> .
+
+:xylo a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    rdfs:label "Mallet" ;
+    val:element :pitch , :noise , :tone , :env , :vca , :bank , :vol , :out ;
+    val:arc :a_noise_out__tone_in ,
+        :a_tone_out__vca_in ,
+        :a_vca_out__bank_in ,
+        :a_bank_out__vol_in ,
+        :a_vol_out__out_in ,
+        :a_pitch_out__bank_frequency ,
+        :a_env_out__vca_cv .
+
+:pitch a val:MidiPitch .
+
+:noise a val:Noise ;
+    val:colour 0.5 .
+
+:tone a val:OnePole ;
+    val:cutoff 4200.0 ;
+    val:mode 0.0 .
+
+:env a val:Envelope ;
+    val:attack 0.1 ;
+    val:decay 6.0 ;
+    val:sustain 0.0 ;
+    val:release 1.0 .
+
+:vca a val:VCA .
+
+:bank a val:ModalBank ;
+    val:decay 0.38 ;
+    val:brightness 0.85 ;
+    val:mode 0.0 .
+
+:vol a val:Gain ;
+    val:gain -22.0 .
+
+:out a val:Output .
+
+:a_noise_out__tone_in a val:Arc ;
+    val:from [ val:node :noise ; val:port "out" ] ;
+    val:to   [ val:node :tone ; val:port "in" ] .
+
+:a_tone_out__vca_in a val:Arc ;
+    val:from [ val:node :tone ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "in" ] .
+
+:a_vca_out__bank_in a val:Arc ;
+    val:from [ val:node :vca ; val:port "out" ] ;
+    val:to   [ val:node :bank ; val:port "in" ] .
+
+:a_bank_out__vol_in a val:Arc ;
+    val:from [ val:node :bank ; val:port "out" ] ;
+    val:to   [ val:node :vol ; val:port "in" ] .
+
+:a_vol_out__out_in a val:Arc ;
+    val:from [ val:node :vol ; val:port "out" ] ;
+    val:to   [ val:node :out ; val:port "in" ] .
+
+:a_pitch_out__bank_frequency a val:ControlArc ;
+    val:from [ val:node :pitch ; val:port "out" ] ;
+    val:to   [ val:node :bank ; val:port "frequency" ] .
+
+:a_env_out__vca_cv a val:ControlArc ;
+    val:from [ val:node :env ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "cv" ] .

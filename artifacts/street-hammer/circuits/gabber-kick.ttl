@@ -1,0 +1,237 @@
+# gabber-kick.ttl
+# 
+# A hardcore kick. A sine falls from 330 Hz to the G below the bass (49 Hz) in about 40 ms,
+# its amplitude falls over 300 ms, and the result is driven into a tanh stage and a hard clip AFTER the envelope, so the
+# tail stays clipped and loud while it dies away: that is the sound. A short high noise click gives the attack.
+# Key 36 is the kick; key 35 is a long sub boom for the start of a drop.
+# Gabber: https://en.wikipedia.org/wiki/Gabber_(music_genre)
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis-artifacts:street-hammer:gabberkick#> .
+
+:gabberkick a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    rdfs:label "Gabber kick" ;
+    val:element :kGate , :kPitchEnv , :kPitch , :kOsc , :kAmpEnv , :kVca , :kDrive , :kClip , :kLevel , :clickNoise , :clickHp , :clickEnv , :clickVca , :clickLevel , :bGate , :bPitchEnv , :bPitch , :bOsc , :bAmpEnv , :bVca , :bLevel , :mix , :limit , :out ;
+    val:arc :a_kGate_gate__kPitchEnv_gate ,
+        :a_kGate_gate__kAmpEnv_gate ,
+        :a_kGate_gate__clickEnv_gate ,
+        :a_kPitchEnv_out__kPitch_in ,
+        :a_kPitch_out__kOsc_frequency ,
+        :a_kOsc_out__kVca_in ,
+        :a_kAmpEnv_out__kVca_cv ,
+        :a_kVca_out__kDrive_in ,
+        :a_kDrive_out__kClip_in ,
+        :a_kClip_out__kLevel_in ,
+        :a_kLevel_out__mix_in ,
+        :a_clickNoise_out__clickHp_in ,
+        :a_clickHp_out__clickVca_in ,
+        :a_clickEnv_out__clickVca_cv ,
+        :a_clickVca_out__clickLevel_in ,
+        :a_clickLevel_out__mix_in ,
+        :a_bGate_gate__bPitchEnv_gate ,
+        :a_bGate_gate__bAmpEnv_gate ,
+        :a_bPitchEnv_out__bPitch_in ,
+        :a_bPitch_out__bOsc_frequency ,
+        :a_bOsc_out__bVca_in ,
+        :a_bAmpEnv_out__bVca_cv ,
+        :a_bVca_out__bLevel_in ,
+        :a_bLevel_out__mix_in ,
+        :a_mix_out__limit_in ,
+        :a_limit_out__out_in .
+
+:kGate a val:NoteGate ;
+    val:note 36 .
+
+:kPitchEnv a val:Envelope ;
+    val:attack 0.1 ;
+    val:decay 40.0 ;
+    val:sustain 0.0 ;
+    val:release 3.0 .
+
+:kPitch a val:Scale ;
+    val:min 49.0 ;
+    val:max 330.0 .
+
+:kOsc a val:Oscillator ;
+    val:shape 0 .
+
+:kAmpEnv a val:Envelope ;
+    val:attack 0.4 ;
+    val:decay 300.0 ;
+    val:sustain 0.0 ;
+    val:release 30.0 .
+
+:kVca a val:VCA .
+
+:kDrive a val:Tanh ;
+    val:gain 14.0 .
+
+:kClip a val:HardClip ;
+    val:threshold 0.7 .
+
+:kLevel a val:Gain ;
+    val:gain -6.0 .
+
+:clickNoise a val:Noise ;
+    val:colour 0.0 .
+
+:clickHp a val:Biquad ;
+    val:mode 4 ;
+    val:frequency 3500.0 ;
+    val:q 0.7 .
+
+:clickEnv a val:Envelope ;
+    val:attack 0.1 ;
+    val:decay 5.0 ;
+    val:sustain 0.0 ;
+    val:release 2.0 .
+
+:clickVca a val:VCA .
+
+:clickLevel a val:Gain ;
+    val:gain -16.0 .
+
+:bGate a val:NoteGate ;
+    val:note 35 .
+
+:bPitchEnv a val:Envelope ;
+    val:attack 0.5 ;
+    val:decay 380.0 ;
+    val:sustain 0.0 ;
+    val:release 20.0 .
+
+:bPitch a val:Scale ;
+    val:min 38.0 ;
+    val:max 115.0 .
+
+:bOsc a val:Oscillator ;
+    val:shape 0 .
+
+:bAmpEnv a val:Envelope ;
+    val:attack 4.0 ;
+    val:decay 2400.0 ;
+    val:sustain 0.0 ;
+    val:release 500.0 .
+
+:bVca a val:VCA .
+
+:bLevel a val:Gain ;
+    val:gain -3.0 .
+
+:mix a val:Mixer .
+
+:limit a val:Limiter ;
+    val:ceiling -1.0 .
+
+:out a val:Output .
+
+:a_kGate_gate__kPitchEnv_gate a val:ControlArc ;
+    val:from [ val:node :kGate ; val:port "gate" ] ;
+    val:to   [ val:node :kPitchEnv ; val:port "gate" ] .
+
+:a_kGate_gate__kAmpEnv_gate a val:ControlArc ;
+    val:from [ val:node :kGate ; val:port "gate" ] ;
+    val:to   [ val:node :kAmpEnv ; val:port "gate" ] .
+
+:a_kGate_gate__clickEnv_gate a val:ControlArc ;
+    val:from [ val:node :kGate ; val:port "gate" ] ;
+    val:to   [ val:node :clickEnv ; val:port "gate" ] .
+
+:a_kPitchEnv_out__kPitch_in a val:ControlArc ;
+    val:from [ val:node :kPitchEnv ; val:port "out" ] ;
+    val:to   [ val:node :kPitch ; val:port "in" ] .
+
+:a_kPitch_out__kOsc_frequency a val:ControlArc ;
+    val:from [ val:node :kPitch ; val:port "out" ] ;
+    val:to   [ val:node :kOsc ; val:port "frequency" ] .
+
+:a_kOsc_out__kVca_in a val:Arc ;
+    val:from [ val:node :kOsc ; val:port "out" ] ;
+    val:to   [ val:node :kVca ; val:port "in" ] .
+
+:a_kAmpEnv_out__kVca_cv a val:ControlArc ;
+    val:from [ val:node :kAmpEnv ; val:port "out" ] ;
+    val:to   [ val:node :kVca ; val:port "cv" ] .
+
+:a_kVca_out__kDrive_in a val:Arc ;
+    val:from [ val:node :kVca ; val:port "out" ] ;
+    val:to   [ val:node :kDrive ; val:port "in" ] .
+
+:a_kDrive_out__kClip_in a val:Arc ;
+    val:from [ val:node :kDrive ; val:port "out" ] ;
+    val:to   [ val:node :kClip ; val:port "in" ] .
+
+:a_kClip_out__kLevel_in a val:Arc ;
+    val:from [ val:node :kClip ; val:port "out" ] ;
+    val:to   [ val:node :kLevel ; val:port "in" ] .
+
+:a_kLevel_out__mix_in a val:Arc ;
+    val:from [ val:node :kLevel ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_clickNoise_out__clickHp_in a val:Arc ;
+    val:from [ val:node :clickNoise ; val:port "out" ] ;
+    val:to   [ val:node :clickHp ; val:port "in" ] .
+
+:a_clickHp_out__clickVca_in a val:Arc ;
+    val:from [ val:node :clickHp ; val:port "out" ] ;
+    val:to   [ val:node :clickVca ; val:port "in" ] .
+
+:a_clickEnv_out__clickVca_cv a val:ControlArc ;
+    val:from [ val:node :clickEnv ; val:port "out" ] ;
+    val:to   [ val:node :clickVca ; val:port "cv" ] .
+
+:a_clickVca_out__clickLevel_in a val:Arc ;
+    val:from [ val:node :clickVca ; val:port "out" ] ;
+    val:to   [ val:node :clickLevel ; val:port "in" ] .
+
+:a_clickLevel_out__mix_in a val:Arc ;
+    val:from [ val:node :clickLevel ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_bGate_gate__bPitchEnv_gate a val:ControlArc ;
+    val:from [ val:node :bGate ; val:port "gate" ] ;
+    val:to   [ val:node :bPitchEnv ; val:port "gate" ] .
+
+:a_bGate_gate__bAmpEnv_gate a val:ControlArc ;
+    val:from [ val:node :bGate ; val:port "gate" ] ;
+    val:to   [ val:node :bAmpEnv ; val:port "gate" ] .
+
+:a_bPitchEnv_out__bPitch_in a val:ControlArc ;
+    val:from [ val:node :bPitchEnv ; val:port "out" ] ;
+    val:to   [ val:node :bPitch ; val:port "in" ] .
+
+:a_bPitch_out__bOsc_frequency a val:ControlArc ;
+    val:from [ val:node :bPitch ; val:port "out" ] ;
+    val:to   [ val:node :bOsc ; val:port "frequency" ] .
+
+:a_bOsc_out__bVca_in a val:Arc ;
+    val:from [ val:node :bOsc ; val:port "out" ] ;
+    val:to   [ val:node :bVca ; val:port "in" ] .
+
+:a_bAmpEnv_out__bVca_cv a val:ControlArc ;
+    val:from [ val:node :bAmpEnv ; val:port "out" ] ;
+    val:to   [ val:node :bVca ; val:port "cv" ] .
+
+:a_bVca_out__bLevel_in a val:Arc ;
+    val:from [ val:node :bVca ; val:port "out" ] ;
+    val:to   [ val:node :bLevel ; val:port "in" ] .
+
+:a_bLevel_out__mix_in a val:Arc ;
+    val:from [ val:node :bLevel ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_mix_out__limit_in a val:Arc ;
+    val:from [ val:node :mix ; val:port "out" ] ;
+    val:to   [ val:node :limit ; val:port "in" ] .
+
+:a_limit_out__out_in a val:Arc ;
+    val:from [ val:node :limit ; val:port "out" ] ;
+    val:to   [ val:node :out ; val:port "in" ] .

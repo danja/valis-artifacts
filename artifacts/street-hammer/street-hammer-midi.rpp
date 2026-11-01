@@ -1,0 +1,94 @@
+<REAPER_PROJECT 0.1 "7.83/linux-x86_64" 1793285344 0
+  TEMPO 170 4 4
+  SAMPLERATE 48000 0 0
+  <TRACK
+    NAME "kick"
+    VOLPAN 0.807678 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000001}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "kick.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/kick.mid"
+      >
+    >
+  >
+  <TRACK
+    NAME "kit"
+    VOLPAN 0.775476 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000002}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "kit.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/kit.mid"
+      >
+    >
+  >
+  <TRACK
+    NAME "bass"
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000003}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "bass.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/bass.mid"
+      >
+    >
+  >
+  <TRACK
+    NAME "xylo"
+    VOLPAN 0.696163 -0.15 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000004}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "xylo.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/xylo.mid"
+      >
+    >
+  >
+  <TRACK
+    NAME "lead"
+    VOLPAN 0.330523 0.15 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000005}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "lead.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/lead.mid"
+      >
+    >
+  >
+  <TRACK
+    NAME "riser"
+    VOLPAN 0.197976 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000006}
+    <ITEM
+      POSITION 0
+      LENGTH 224.588
+      LOOP 0
+      NAME "riser.mid"
+      <SOURCE MIDI
+        FILE "/chalet/github/valis-artifacts/artifacts/street-hammer/midi/riser.mid"
+      >
+    >
+  >
+>
