@@ -1,0 +1,40 @@
+# song.ttl
+#
+# "Interstate Rain": the layout and the mix of the piece, as data. The notes are in midi/, played by the circuits in
+# circuits/. Paths are relative to this file. Check it with the read_song tool; scripts/interstate-rain/track.py reads
+# it for the tempo, the sections and the mix, and keeps only the score.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:interstate-rain#> .
+
+:song a val:Song ;
+    val:title "Interstate Rain" ;
+    val:tempo 100 ;
+    val:loudness -14 ;
+    val:hasSection :intro , :verseA , :verseB , :bridge , :solo , :verseC , :outro ;
+    val:hasPart :bass , :epiano , :guitar , :kit , :rain , :thunder ;
+    val:hasReturn :epiano-verb , :guitar-verb .
+
+# Sections. val:level is the gain of the whole mix while the section plays.
+:intro  a val:Section ; val:index 1 ; val:bars 8  ; val:level -4.0 .
+:verseA a val:Section ; val:index 2 ; val:bars 16 ; val:level  0.0 .
+:verseB a val:Section ; val:index 3 ; val:bars 16 ; val:level  0.5 .
+:bridge a val:Section ; val:index 4 ; val:bars 8  ; val:level  1.0 .
+:solo   a val:Section ; val:index 5 ; val:bars 16 ; val:level  1.5 .
+:verseC a val:Section ; val:index 6 ; val:bars 8  ; val:level  0.0 .
+:outro  a val:Section ; val:index 7 ; val:bars 8  ; val:level -3.0 .
+
+# Parts. val:level is the level in dB of the stem's playing rms.
+:bass    a val:Part ; val:index 1 ; val:circuit "circuits/dx7-bass.ttl"         ; val:level -20 ; val:pan  0.0  ; val:highpass 30 .
+:epiano  a val:Part ; val:index 2 ; val:circuit "circuits/dx7-epiano.ttl"       ; val:level -23 ; val:pan -0.2  ; val:highpass 90 .
+:guitar  a val:Part ; val:index 3 ; val:circuit "circuits/halloween-guitar.ttl" ; val:level -28 ; val:pan  0.35 ; val:highpass 150 .
+:kit     a val:Part ; val:index 4 ; val:circuit "circuits/drum-machine.ttl"      ; val:level -26 ; val:pan  0.0  ; val:highpass 40 .
+:rain    a val:Part ; val:index 5 ; val:circuit "circuits/rain.ttl"             ; val:level -34 ; val:pan  0.0  ; val:highpass 120 .
+:thunder a val:Part ; val:index 6 ; val:circuit "circuits/thunder.ttl"          ; val:level -29 ; val:pan  0.0  ; val:highpass 30 .
+
+# Returns: a part's stem through an effect circuit, mixed as a stem of its own.
+:epiano-verb a val:Return ; val:index 1 ; val:source :epiano ; val:circuit "circuits/reverb-return.ttl" ;
+    val:level -31 ; val:pan  0.3 ; val:highpass 200 .
+:guitar-verb a val:Return ; val:index 2 ; val:source :guitar ; val:circuit "circuits/reverb-return.ttl" ;
+    val:level -33 ; val:pan -0.3 ; val:highpass 250 .
