@@ -1,0 +1,30 @@
+# thunder.ttl
+#
+# Three recorded rumbles of thunder (CC0, freesound.org sounds 778363, 778371 and 574385), one on each of keys 60, 62
+# and 64. Each plays through to its end whatever the length of the note (oneshot), and keytrack is off so none is
+# pitched by the key. Sources, authors and licences are in sources/interstate-rain/audio/*.json.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :      <urn:valis:thunder#> .
+
+:circuit a val:Circuit ;
+    rdfs:label "Thunder" ;
+    val:element :thunder , :out ;
+    val:arc :aThunder .
+
+:thunder a val:Sampler ;
+    val:keytrack 0.0 ;
+    val:oneshot 1.0 ;
+    val:release 400.0 ;
+    val:samples """
+        file=/home/danny/github/valis-artifacts/sources/interstate-rain/audio/thunder-rumble-778363.ogg  key=60 name="Distant rumble"
+        file=/home/danny/github/valis-artifacts/sources/interstate-rain/audio/thunder-rolling-778371.ogg key=62 name="Rolling"
+        file=/home/danny/github/valis-artifacts/sources/interstate-rain/audio/thunder-low-574385.ogg     key=64 name="Low and muffled"
+    """ .
+
+:out a val:Output .
+
+:aThunder a val:Arc ;
+    val:from [ val:node :thunder ; val:port "out" ] ;
+    val:to   [ val:node :out     ; val:port "in"  ] .

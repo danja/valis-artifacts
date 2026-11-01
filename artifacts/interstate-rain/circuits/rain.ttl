@@ -1,0 +1,29 @@
+# rain.ttl
+#
+# A steady rain from a field recording (CC0, freesound.org sound 200272), played by val:Sampler. One long held
+# note keeps it going: the sound loops between 4 s and 66 s with a 3 s crossfade into the loop start, so no seam
+# is heard. Key 60 is the only key, and keytrack is off so it plays at its recorded pitch.
+# The file is named by an absolute path, so this copy plays only where sources/interstate-rain/ is at the same place;
+# change the path in val:samples to move it.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :      <urn:valis:rain#> .
+
+:circuit a val:Circuit ;
+    rdfs:label "Rain" ;
+    val:element :rain , :out ;
+    val:arc :aRain .
+
+:rain a val:Sampler ;
+    val:keytrack 0.0 ;
+    val:loop 1.0 ;
+    val:attack 2000.0 ;
+    val:release 5000.0 ;
+    val:samples "file=/home/danny/github/valis-artifacts/sources/interstate-rain/audio/rain-heavy-200272.ogg key=60 loopStart=4 loopEnd=66 fade=3 name=Rain" .
+
+:out a val:Output .
+
+:aRain a val:Arc ;
+    val:from [ val:node :rain ; val:port "out" ] ;
+    val:to   [ val:node :out  ; val:port "in"  ] .

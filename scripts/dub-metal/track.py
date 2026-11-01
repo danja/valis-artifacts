@@ -2,11 +2,11 @@
 #
 # "dub-metal" (working title): dub reggae foundations with industrial metal-bashing on top, played by the circuits in
 # the Valis repository (dub-bass.ttl, 909.ttl, tonewheel-organ.ttl, metal-clang.ttl, free-bell.ttl) and sent through
-# dub-delay.ttl. The brief is in sources/dub-metal-prompt.md.
+# dub-delay.ttl. The brief is in sources/dub-metal/prompt.md.
 #
 #   python3 track.py score    write one MIDI file per part to artifacts/dub-metal/midi/
 #   python3 track.py render   render every part, and the echo returns, to artifacts/dub-metal/wavs/
-#   python3 track.py mix      mix the stems to artifacts/dub-metal/mixes/
+#   python3 track.py mix      mix the stems to artifacts/dub-metal/mixes/ (--version=vN, --lufs=N, --arc for a level per section)
 #   python3 track.py          all three
 #
 # C Phrygian Dominant (C Db E F G Ab Bb), 85 bpm, 72 bars (about 3:23). The harmony is a vamp on C and Db, so the half
@@ -18,11 +18,41 @@ VALIS = os.environ.get("VALIS", "/chalet/github/valis")
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUTDIR = os.path.normpath(os.path.join(HERE, "..", "..", "artifacts", "dub-metal"))
 MIDI, WAVS, MIXES = (os.path.join(OUTDIR, d) for d in ("midi", "wavs", "mixes"))
-# Release is several times faster and renders the same samples; fall back to Debug when only that is built.
-# VALIS_RENDER names a binary outright, for when the Release build is older than the code.
-RENDER = os.environ.get("VALIS_RENDER") or next((p for p in (os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
-                           for d, c in (("build-release", "Release"), ("build", "Debug"))) if os.path.exists(p)),
-              os.path.join(VALIS, "build", "valis_render_artefacts", "Debug", "valis_render"))
+def newest_source():
+    """Modification time of the newest file the renderer is built from."""
+    newest = 0.0
+    for top in ("src", "include", "vocabs"):
+        for root, _, names in os.walk(os.path.join(VALIS, top)):
+            for n in names:
+                newest = max(newest, os.path.getmtime(os.path.join(root, n)))
+    return newest
+
+
+def pick_renderer():
+    """Release is several times faster and renders the same samples, but a binary older than the source renders the old
+    code (this once rendered a stem full of NaN that the source had already fixed), so a stale one is passed over.
+    VALIS_RENDER names a binary outright."""
+    if os.environ.get("VALIS_RENDER"):
+        return os.environ["VALIS_RENDER"]
+    newest = newest_source()
+    for d, c in (("build-release", "Release"), ("build", "Debug")):
+        p = os.path.join(VALIS, d, "valis_render_artefacts", c, "valis_render")
+        if os.path.exists(p):
+            if os.path.getmtime(p) >= newest:
+                return p
+            print("skipping %s: older than the source (rebuild it, or set VALIS_RENDER)" % p, file=sys.stderr)
+    sys.exit("no valis_render newer than the source: run cmake --build build-release")
+
+
+_renderer = None
+
+
+def renderer():
+    """Chosen on first use, so `mix` alone never needs a built renderer."""
+    global _renderer
+    if _renderer is None:
+        _renderer = pick_renderer()
+    return _renderer
 sys.path.insert(0, os.path.join(VALIS, "scripts", "halloween"))
 sys.path.insert(0, os.path.join(VALIS, "scripts", "shot"))
 import midiw, lufs
@@ -148,7 +178,7 @@ RETURNS = [("stabs", "stabs-echo"), ("metal", "metal-echo")]
 
 
 def run(args):
-    r = subprocess.run([RENDER] + args, cwd=VALIS, capture_output=True, text=True)
+    r = subprocess.run([renderer()] + args, cwd=VALIS, capture_output=True, text=True)
     return r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:]
 
 
@@ -201,7 +231,43 @@ def room(x, rate):
     return wet[:len(x)]
 
 
-def mix(target_lufs=None, version="v1"):
+# Gain in dB for each section, applied with --arc. The stems are levelled by their own playing rms, so without this every
+# section sits within 3 to 4 dB of the others; this makes the breakdown quieter and the peak louder.
+ARC_DB = {"intro": -3.0, "groove": 0.0, "bash": 1.0, "dub": -4.0, "peak": 2.5, "outro": -3.0}
+
+
+def arc_curve(rate, length):
+    """Per-sample gain (linear) that steps between the sections' ARC_DB, smoothed over about two seconds."""
+    import numpy as np
+    curve = np.zeros(length)
+    bar = 4 * 60 / BPM
+    at = 0
+    for name, bars in SECTIONS:
+        end = at + int(bars * bar * rate)
+        curve[at:min(end, length)] = ARC_DB[name]
+        at = end
+    curve[at:] = ARC_DB[SECTIONS[-1][0]]
+    w = int(2.0 * rate) | 1
+    padded = np.concatenate([np.full(w // 2, curve[0]), curve, np.full(w // 2, curve[-1])])
+    running = np.concatenate([[0.0], np.cumsum(padded)])   # a moving average in one pass, not len(curve) * w multiplies
+    smooth = (running[w:] - running[:-w]) / w
+    return 10 ** (smooth / 20)
+
+
+def section_levels(x, rate):
+    """Playing rms in dB of each section, so an arc can be checked by number."""
+    import numpy as np
+    bar = 4 * 60 / BPM
+    out, at = [], 0
+    for name, bars in SECTIONS:
+        end = at + int(bars * bar * rate)
+        seg = x[at:end]
+        out.append((name, playing_rms_db(seg if seg.ndim == 1 else seg.mean(axis=1), rate)))
+        at = end
+    return out
+
+
+def mix(target_lufs=None, version="v1", arc=False):
     import numpy as np
     from scipy.io import wavfile
     from scipy.signal import butter, sosfilt
@@ -224,6 +290,8 @@ def mix(target_lufs=None, version="v1"):
             total = np.zeros((max(len(stereo), int(SECONDS * rate)), 2))
         total[:len(stereo)] += stereo
     total = total[:int((BARS * 4 * 60 / BPM + 4) * rate)]
+    if arc:
+        total = total * arc_curve(rate, len(total))[:, None]
     total[-3 * rate:] *= np.linspace(1.0, 0.0, 3 * rate)[:, None]
     total = total + room(total, rate) * 0.12
     mx = np.tanh(total * 1.5) / 1.5
@@ -237,6 +305,7 @@ def mix(target_lufs=None, version="v1"):
         print("loudness: gain %+.2f dB toward %.1f LUFS%s" % (gain, target_lufs, " (held back by the peak ceiling)" if limited else ""))
     print("mixed:", out)
     print("loudness:", lufs.measure(out))
+    print("section levels (playing rms, dB):", ", ".join("%s %.1f" % lv for lv in section_levels(mx, rate)))
 
 
 if __name__ == "__main__":
@@ -245,6 +314,6 @@ if __name__ == "__main__":
     version = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--version=")), "v1")
     for s in steps:
         if s == "mix":
-            mix(target, version)
+            mix(target, version, arc="--arc" in sys.argv[1:])
         else:
             {"score": score, "render": render}[s]()

@@ -6,7 +6,7 @@ in the files, not whether it is good. Three mixes are kept so they can be compar
 
 ## The brief
 
-`sources/dub-metal-prompt.md`: C Phrygian Dominant, 85 bpm, dub reggae foundations (heavy electric bass, sparse keyboard
+`sources/dub-metal/prompt.md`: C Phrygian Dominant, 85 bpm, dub reggae foundations (heavy electric bass, sparse keyboard
 offbeat stabs with delay), upper layers from industrial (metal bashing), minimally melodic, more feeling than
 intellect. (The brief sits in `sources/` and not in `sources/dub-metal/` as `docs/dir-layout.md` asks. I left it where
 it was put.)
@@ -104,6 +104,19 @@ The first listener said the stabs did not bubble and that the only metal they he
 * **Result, measured.** The share of energy above 2 kHz roughly doubled where the metal plays: bash 1.24% to 2.42%, peak 0.92%
   to 1.73%, dub 0.20% to 0.38%. Section levels still differ by only 3 to 4 dB. That is still a mix dominated by the low end,
   and whether the metal now reads as bashing and the stabs as bubbling is for a listener, not for these figures.
+* **Neural check (CLAP, after the Release tools gained their models; relative shares among five queries, not calibrated).**
+  The metal stem alone: "banging on metal" 74%, "church bells" 0.3%. The mix: "industrial metal" rose from 1.2% to 2.3% and
+  "banging on metal" stayed at about 0.5%, so the metal is clear alone and still buried in the mix. "dub reggae" fell from 33% to
+  17% and "organ chords" rose from 65% to 80%: the denser stabs now dominate, and the stabs stem alone reads as organ chords
+  (96%) with "dub reggae" at 2%. The next change is probably in the mix (stabs down, metal up), which you are doing.
+
+## A level for each section: v5
+
+The stems were levelled by their own playing rms, so every section sat within 3 to 4 dB of the others and the arc of the piece
+was in the notes and not in the loudness. `track.py mix --arc` applies a gain per section (intro -3, groove 0, bash +1, dub -4,
+peak +2.5, outro -3 dB, smoothed over two seconds) to the sum of the stems. Measured on v5 at -14 LUFS: section levels intro
+-22.4, groove -18.0, bash -15.3, dub -22.5, peak -13.2, outro -21.0 dB, and a loudness range of 9.9 LU where v4 had 4.7. The
+table is a first guess; it is the easiest thing to change in `ARC_DB`.
 
 ## Not decided: needs a listener
 
