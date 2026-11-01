@@ -1,0 +1,119 @@
+# score.ttl
+#
+# "dub-metal": the notes of the kit, bass, stabs and bell as patterns, chords and a plan. The `metal` part is not here:
+# it is a seeded random cycle, so it stays in scripts/dub-metal/track.py. `valis-song score song.ttl` writes the MIDI of
+# every part this file plays; the script writes the rest.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix :     <urn:valis-artifacts:dub-metal-score#> .
+
+:score a val:Score ; val:seed 85 ;
+    val:progression "C C Db C C C Fm Db" ;       # eight bars, round again, from the start of each section
+    val:hasChord :C , :Db , :Fm ;
+    val:hasPattern :hats , :onedrop , :steppers , :openhat , :fill , :plain , :heavy , :skank , :light , :lone , :toll ;
+    val:hasFeel :kit-feel , :bass-feel , :stabs-feel , :bell-feel ;
+    val:hasPlay :intro-kit , :intro-bass ,
+        :groove-kit , :groove-open , :groove-fill , :groove-bass , :groove-stabs ,
+        :bash-kit , :bash-open , :bash-fill , :bash-bass , :bash-stabs ,
+        :dub-bass , :dub-stabs , :dub-bell ,
+        :peak-kit , :peak-bass , :peak-stabs ,
+        :outro-kit , :outro-bass , :outro-stabs , :outro-bell .
+
+# Chords. The root and the pickup (the half step above the root, or the next chord's approach) are for the bass; the tones
+# are the stab voicing with its top note doubled an octave up.
+:C  a val:Chord ; val:root 36 ; val:pickup 37 ; val:tones "60 64 67 72" .
+:Db a val:Chord ; val:root 37 ; val:pickup 40 ; val:tones "61 65 68 73" .      # Db to E, the augmented second
+:Fm a val:Chord ; val:root 41 ; val:pickup 37 ; val:tones "60 65 68 72" .
+
+# Patterns: one bar of 4/4, sixteen steps, a beat to four steps.
+
+# hats: eight a bar, the offbeats louder
+:hats a val:Pattern ; val:hasLane
+    [ val:key 42 ; val:steps "x...|x...|x...|x..." ; val:velocity 62 ; val:length 0.8 ; val:gate 1 ] ,
+    [ val:key 42 ; val:steps "..x.|..x.|..x.|..x." ; val:velocity 84 ; val:length 0.8 ; val:gate 1 ] .
+
+# one-drop: the hats, and the kick and the rim together on beat three
+:onedrop a val:Pattern ; val:hasLane
+    [ val:key 42 ; val:steps "x...|x...|x...|x..." ; val:velocity 62 ; val:length 0.8 ; val:gate 1 ] ,
+    [ val:key 42 ; val:steps "..x.|..x.|..x.|..x." ; val:velocity 84 ; val:length 0.8 ; val:gate 1 ] ,
+    [ val:key 36 ; val:steps "....|....|x...|...." ; val:velocity 124 ; val:length 1 ; val:gate 1 ] ,
+    [ val:key 37 ; val:steps "....|....|x...|...." ; val:velocity 104 ; val:length 1 ; val:gate 1 ] .
+
+# steppers: a kick on every beat, the third the strongest
+:steppers a val:Pattern ; val:hasLane
+    [ val:key 42 ; val:steps "x...|x...|x...|x..." ; val:velocity 62 ; val:length 0.8 ; val:gate 1 ] ,
+    [ val:key 42 ; val:steps "..x.|..x.|..x.|..x." ; val:velocity 84 ; val:length 0.8 ; val:gate 1 ] ,
+    [ val:key 36 ; val:steps "x...|....|....|...." ; val:velocity 118 ; val:length 1 ; val:gate 1 ] ,
+    [ val:key 36 ; val:steps "....|x...|....|x..." ; val:velocity 96 ; val:length 1 ; val:gate 1 ] ,
+    [ val:key 36 ; val:steps "....|....|x...|...." ; val:velocity 124 ; val:length 1 ; val:gate 1 ] ,
+    [ val:key 37 ; val:steps "....|....|x...|...." ; val:velocity 104 ; val:length 1 ; val:gate 1 ] .
+
+# an open hat on the and of four, on every second bar
+:openhat a val:Pattern ; val:hasLane
+    [ val:key 46 ; val:steps "....|....|....|..x." ; val:velocity 76 ; val:length 1.2 ; val:gate 1 ] .
+
+# a two-note tom fill at the end of a section
+:fill a val:Pattern ; val:hasLane
+    [ val:key 43 ; val:steps "....|....|....|x..." ; val:velocity 100 ; val:length 1 ; val:gate 1 ] ,
+    [ val:key 41 ; val:steps "....|....|....|..x." ; val:velocity 112 ; val:length 1 ; val:gate 1 ] .
+
+# bass: the root held through the first beat and a half, a push before beat three and a pickup
+:plain a val:Pattern ; val:hasLane
+    [ val:voice "root" ; val:steps "x...|....|....|...." ; val:velocity 118 ; val:length 5.6 ; val:gate 1 ] ,
+    [ val:voice "root" ; val:steps "....|....|..x.|...." ; val:velocity 104 ; val:length 1.6 ; val:gate 1 ] ,
+    [ val:voice "pickup" ; val:steps "....|....|....|..x." ; val:velocity 100 ; val:length 1.6 ; val:gate 1 ] .
+
+# the same, with the root an octave up between the first two
+:heavy a val:Pattern ; val:hasLane
+    [ val:voice "root" ; val:steps "x...|....|....|...." ; val:velocity 118 ; val:length 5.6 ; val:gate 1 ] ,
+    [ val:voice "root" ; val:steps "....|....|..x.|...." ; val:velocity 104 ; val:length 1.6 ; val:gate 1 ] ,
+    [ val:voice "pickup" ; val:steps "....|....|....|..x." ; val:velocity 100 ; val:length 1.6 ; val:gate 1 ] ,
+    [ val:voice "root" ; val:steps "....|...x|....|...." ; val:velocity 90 ; val:length 0.8 ; val:gate 1 ; val:octave 1 ] .
+
+# stabs: every offbeat, the and of two and of four louder: the chop that bubbles
+:skank a val:Pattern ; val:hasLane
+    [ val:voice "chord" ; val:steps "....|..x.|....|..x." ; val:velocity 100 ; val:length 0.48 ; val:gate 1 ] ,
+    [ val:voice "chord" ; val:steps "..x.|....|..x.|...." ; val:velocity 78 ; val:length 0.48 ; val:gate 1 ] .
+
+# stabs: the and of two and the and of four
+:light a val:Pattern ; val:hasLane
+    [ val:voice "chord" ; val:steps "....|..x.|....|..x." ; val:velocity 100 ; val:length 0.48 ; val:gate 1 ] .
+
+# one stab on the and of two
+:lone a val:Pattern ; val:hasLane
+    [ val:voice "chord" ; val:steps "....|..x.|....|...." ; val:velocity 100 ; val:length 0.48 ; val:gate 1 ] .
+
+# bell: one low toll, 3 beats long
+:toll a val:Pattern ; val:hasLane
+    [ val:key 60 ; val:steps "x...|....|....|...." ; val:velocity 100 ; val:length 12 ; val:gate 1 ] .
+
+# How loosely each part is played: about 6 ms and 4 velocity steps. The metal is exact and is not in this file.
+:kit-feel   a val:Feel ; val:part "kit"   ; val:timing 6 ; val:velocity 4 .
+:bass-feel  a val:Feel ; val:part "bass"  ; val:timing 6 ; val:velocity 4 .
+:stabs-feel a val:Feel ; val:part "stabs" ; val:timing 6 ; val:velocity 4 .
+:bell-feel  a val:Feel ; val:part "bell"  ; val:timing 6 ; val:velocity 4 .
+
+# The plan: who plays what in each section.
+
+:intro-kit a val:Play ; val:section "intro" ; val:part "kit" ; val:pattern :hats .
+:intro-bass a val:Play ; val:section "intro" ; val:part "bass" ; val:pattern :plain .
+:groove-kit a val:Play ; val:section "groove" ; val:part "kit" ; val:pattern :onedrop .
+:groove-open a val:Play ; val:section "groove" ; val:part "kit" ; val:pattern :openhat ; val:fromBar 2 ; val:every 2 .
+:groove-fill a val:Play ; val:section "groove" ; val:part "kit" ; val:pattern :fill ; val:fromBar 16 ; val:toBar 16 .
+:groove-bass a val:Play ; val:section "groove" ; val:part "bass" ; val:pattern :plain .
+:groove-stabs a val:Play ; val:section "groove" ; val:part "stabs" ; val:pattern :light .
+:bash-kit a val:Play ; val:section "bash" ; val:part "kit" ; val:pattern :onedrop .
+:bash-open a val:Play ; val:section "bash" ; val:part "kit" ; val:pattern :openhat ; val:fromBar 2 ; val:every 2 .
+:bash-fill a val:Play ; val:section "bash" ; val:part "kit" ; val:pattern :fill ; val:fromBar 16 ; val:toBar 16 .
+:bash-bass a val:Play ; val:section "bash" ; val:part "bass" ; val:pattern :plain .
+:bash-stabs a val:Play ; val:section "bash" ; val:part "stabs" ; val:pattern :skank .
+:dub-bass a val:Play ; val:section "dub" ; val:part "bass" ; val:pattern :plain .
+:dub-stabs a val:Play ; val:section "dub" ; val:part "stabs" ; val:pattern :lone ; val:every 4 .
+:dub-bell a val:Play ; val:section "dub" ; val:part "bell" ; val:pattern :toll ; val:every 4 .
+:peak-kit a val:Play ; val:section "peak" ; val:part "kit" ; val:pattern :steppers .
+:peak-bass a val:Play ; val:section "peak" ; val:part "bass" ; val:pattern :heavy .
+:peak-stabs a val:Play ; val:section "peak" ; val:part "stabs" ; val:pattern :skank .
+:outro-kit a val:Play ; val:section "outro" ; val:part "kit" ; val:pattern :hats .
+:outro-bass a val:Play ; val:section "outro" ; val:part "bass" ; val:pattern :plain .
+:outro-stabs a val:Play ; val:section "outro" ; val:part "stabs" ; val:pattern :lone ; val:every 4 .
+:outro-bell a val:Play ; val:section "outro" ; val:part "bell" ; val:pattern :toll ; val:every 4 .

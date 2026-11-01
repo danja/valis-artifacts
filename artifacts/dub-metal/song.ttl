@@ -11,6 +11,7 @@
 :song a val:Song ;
     val:title "dub-metal" ;
     val:tempo 85 ;
+    val:score "score.ttl" ;
     val:fadeSeconds 3 ;
     val:roomAmount 0.12 ;
     val:drive 1.5 ;
