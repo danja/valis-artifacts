@@ -93,7 +93,7 @@ it was put.)
 The first listener said the stabs did not bubble and that the only metal they heard was bells. The measurements agreed.
 
 * **Metal.** `metal-bash.ttl` rings for two to three seconds on a tuned note, which reads as a bell, and its hammer strike is
-  far quieter than the ring. `examples/metal-clang.ttl` keeps the ring to about a third of a second, drives it harder, and
+  far quieter than the ring. `circuits/metal-clang.ttl` keeps the ring to about a third of a second, drives it harder, and
   sends the hammer's noise burst straight to the output. The notes moved down to C3 to C4, in two interlocking cycles of
   five and three sixteenths.
 * **Stabs.** They were quiet, soft and long. They are now short (0.12 beat), double the root an octave up, and play every

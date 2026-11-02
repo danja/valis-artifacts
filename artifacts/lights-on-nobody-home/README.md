@@ -29,15 +29,15 @@ The words are a run of slang for someone who is not very bright ("the lights are
 
 | Part | Circuit (in the Valis repository) |
 |---|---|
-| shakers | `examples/latin-perc.ttl`: maracas, cabasa, guiro, claves, cowbell |
-| congas | `examples/latin-perc.ttl`: congas, bongos |
-| kit | `examples/latin-perc.ttl`: bass drum, snare, floor tom, crash |
-| guitarron | `examples/guitarron.ttl` |
-| vihuela | `examples/nylon-guitar.ttl`, played high and strummed |
-| guitar | `examples/nylon-guitar.ttl`, played in the middle and picked |
-| harp | `examples/harp.ttl` |
-| trumpets | `examples/trumpets.ttl`: four lip-reed voices |
-| violins | `examples/violins.ttl`: four bowed-string voices and a violin body |
+| shakers | `circuits/latin-perc.ttl`: maracas, cabasa, guiro, claves, cowbell |
+| congas | `circuits/latin-perc.ttl`: congas, bongos |
+| kit | `circuits/latin-perc.ttl`: bass drum, snare, floor tom, crash |
+| guitarron | `circuits/guitarron.ttl` |
+| vihuela | `circuits/nylon-guitar.ttl`, played high and strummed |
+| guitar | `circuits/nylon-guitar.ttl`, played in the middle and picked |
+| harp | `circuits/harp.ttl` |
+| trumpets | `circuits/trumpets.ttl`: four lip-reed voices |
+| violins | `circuits/violins.ttl`: four bowed-string voices and a violin body |
 
 The guitars, the guitarron and the harp are a plucked-string exciter (`val:Pluck`, new for this song) driving a
 physical model of a string (`val:StiffString`), with the pluck harder or softer and nearer the bridge or the middle

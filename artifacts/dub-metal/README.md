@@ -10,7 +10,7 @@ stabs into a dotted-eighth echo, sparse in the groove and on every offbeat in th
   was heard only as bells). v1 to v3 are kept to compare. Measured, not heard.
 * `midi/`: bass, kit, stabs, metal, bell.
 * `circuits/`: copies of the six circuits that played the piece (`dub-bass`, `909`, `tonewheel-organ`, `metal-clang`,
-  `free-bell`, `dub-delay`), as they were when v4 was made. The live versions are in the Valis repository's `examples/`.
+  `free-bell`, `dub-delay`), as they were when v4 was made. The live versions are in the Valis repository's `circuits/`.
 * `wavs/`: the stems and the two echo returns.
 * `docs/report.md`: how it was made, what worked, what did not.
 * Made by `../../scripts/dub-metal/track.py` with circuits from the Valis repository.

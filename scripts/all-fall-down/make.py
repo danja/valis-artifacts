@@ -7,7 +7,7 @@
 #   - "London Bridge Is Falling Down", the break and the outro (the lullaby the track ends on).
 #   - "Mary Had a Little Lamb" (Sarah Josepha Hale, 1830), on the toy-piano pluck in the intro.
 # Every note of each tune is moved onto the A natural minor scale, so a major third becomes a minor third, and the
-# chords under them are minor too. The instruments are the eight in examples/nursery-*.ttl.
+# chords under them are minor too. The instruments are the eight in circuits/nursery-*.ttl.
 #
 #   python3 make.py            write circuits/, score.ttl and song.ttl under artifacts/all-fall-down/
 #
@@ -139,6 +139,12 @@ PARTS = [  # name, circuit, level dB (playing rms), pan, highpass Hz, follows
     ("arp",   "nursery-incy-wincy-arp.ttl",    -27, -0.25, 150, None),
     ("pad",   "nursery-rock-a-bye-pad.ttl",    -27,  0.0,   70, None),
     ("riser", "nursery-wind-up-riser.ttl",     -31,  0.0,  200, None),
+]
+
+# A part made outside Valis: the SAM speech synthesizer through nursery-voice-vocoder.ttl, played in Reaper and rendered by hand to
+# wavs/voice.wav (see README.md). It has no circuit here and no MIDI; the mix levels it like any stem.
+RECORDED = [  # name, level dB (playing rms), pan, highpass Hz
+    ("voice", -22, 0.0, 150),
 ]
 
 # -- the harmony: A natural minor ------------------------------------------------------------------------
@@ -447,7 +453,7 @@ def turtle_song():
     out.append(":song a val:Song ;\n    val:title \"All Fall Down\" ;\n    val:tempo %d ;\n    val:score \"score.ttl\" ;\n    val:loudness -10 ;\n"
                "    val:fadeSeconds 8 ;\n    val:roomAmount 0.07 ;\n    val:roomDecay 0.35 ;\n    val:drive 1.4 ;\n"
                "    val:hasSection %s ;\n    val:hasPart %s ;\n    val:hasReturn :lead-verb ." %
-               (TEMPO, " , ".join(":" + n for n, _, _ in SECTIONS), " , ".join(":" + p[0] for p in PARTS)))
+               (TEMPO, " , ".join(":" + n for n, _, _ in SECTIONS), " , ".join(":" + p[0] for p in PARTS + RECORDED)))
     out.append("")
     for i, (n, bars, level) in enumerate(SECTIONS, 1):
         out.append(":%s a val:Section ; val:index %d ; val:bars %d ; val:level %g ." % (n, i, bars, level))
@@ -456,6 +462,8 @@ def turtle_song():
         f = " ; val:follows :%s" % follows if follows else ""
         out.append(":%s a val:Part ; val:index %d ; val:circuit \"circuits/%s\" ; val:level %g ; val:pan %g ; val:highpass %d%s ." %
                    (n, i, circuit, level, pan, hp, f))
+    for i, (n, level, pan, hp) in enumerate(RECORDED, len(PARTS) + 1):
+        out.append(":%s a val:Part ; val:index %d ; val:recorded true ; val:level %g ; val:pan %g ; val:highpass %d ." % (n, i, level, pan, hp))
     out.append("")
     out.append(":lead-verb a val:Return ; val:index 1 ; val:source :lead ; val:circuit \"circuits/reverb-return.ttl\" ;\n"
                "    val:level -35 ; val:pan -0.2 ; val:highpass 250 .")
@@ -465,8 +473,8 @@ def turtle_song():
 def main():
     os.makedirs(os.path.join(OUT, "circuits"), exist_ok=True)
     for _, circuit, *_ in PARTS:
-        shutil.copyfile(os.path.join(VALIS, "examples", circuit), os.path.join(OUT, "circuits", circuit))
-    shutil.copyfile(os.path.join(VALIS, "examples", "reverb-return.ttl"), os.path.join(OUT, "circuits", "reverb-return.ttl"))
+        shutil.copyfile(os.path.join(VALIS, "circuits", circuit), os.path.join(OUT, "circuits", circuit))
+    shutil.copyfile(os.path.join(VALIS, "circuits", "reverb-return.ttl"), os.path.join(OUT, "circuits", "reverb-return.ttl"))
     with open(os.path.join(OUT, "score.ttl"), "w") as f:
         f.write(turtle_score())
     with open(os.path.join(OUT, "song.ttl"), "w") as f:

@@ -28,7 +28,7 @@ Harmony: the verse is Em7 Em7 A7 A7 Em7 Em7 Dmaj7 A7. The bridge is Gmaj7 Gmaj7 
 
 ## End-to-end test notes
 
-* The kit is `examples/drum-machine.ttl` from the Valis repository: eleven CC0 recordings played by `val:Sampler` with
+* The kit is `circuits/drum-machine.ttl` from the Valis repository: eleven CC0 recordings played by `val:Sampler` with
   velocity layers, a hi-hat choke group and a stereo pan for each drum. This track plays it softly (mostly velocities 34 to 70).
 * The rain and thunder are also `val:Sampler`: the rain is a 69 s recording looped between 4 s and 66 s with a 3 s
   crossfade under one held note, and the thunder is three one-shot sounds on keys 60, 62 and 64.

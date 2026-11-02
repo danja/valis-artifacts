@@ -1,7 +1,7 @@
 # scripts/autumn-leaves/track.py
 #
 # "Autumn Leaves" as acid rock: an original arrangement of the chord changes of the standard, played by
-# the circuits in the Valis repository (examples/dmx.ttl, psych-bass.ttl, tonewheel-organ.ttl,
+# the circuits in the Valis repository (circuits/dmx.ttl, psych-bass.ttl, tonewheel-organ.ttl,
 # leslie.ttl, horn-section.ttl, fuzz-lead.ttl). The reference file, sources/autumn-leaves/Autumn-Leaves.mid,
 # supplied the key (G minor) and the cycle of chords; the call lines are new and do not use its melody.
 #

@@ -158,7 +158,7 @@ Capital letters are shouted. A "Beats" of 0.5 is an eighth note.
 def render():
     os.makedirs(OUTDIR + "/wavs", exist_ok=True)
     seconds = 92 * 4 * 60 / BPM + 8
-    r = subprocess.run([RENDER, "examples/vocal-guide.ttl", "--midi", OUTDIR + "/midi/vocal-guide.mid", "--tempo", str(BPM),
+    r = subprocess.run([RENDER, "circuits/vocal-guide.ttl", "--midi", OUTDIR + "/midi/vocal-guide.mid", "--tempo", str(BPM),
                         "--rolling", "--seconds", "%.1f" % seconds, "-o", OUTDIR + "/wavs/vocal-guide.wav"],
                        cwd=VALIS, capture_output=True, text=True)
     print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:])

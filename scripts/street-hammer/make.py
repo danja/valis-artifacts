@@ -410,7 +410,7 @@ def xylo():
     c = Circuit("xylo", "Mallet",
                 "xylo.ttl\n\nA struck bar: a short burst of noise, softened by a low-pass, strikes a val:ModalBank in marimba mode (the\n"
                 "modes of a bar, not a string). A short ring, so a fast ostinato stays separate notes.\n"
-                "See also examples/modal-tom.ttl, which this is cut down from.")
+                "See also circuits/modal-tom.ttl, which this is cut down from.")
     c.add("pitch", "MidiPitch")
     c.add("noise", "Noise", colour=0.5)
     c.add("tone", "OnePole", cutoff=4200.0, mode=0.0)
@@ -499,7 +499,7 @@ def main():
         with open(os.path.join(OUT, "circuits", fn), "w") as f:
             f.write(circuit().text())
     for src, dst in (("909.ttl", "909.ttl"), ("psych-bass.ttl", "hc-bass.ttl"), ("reverb-return.ttl", "reverb-return.ttl")):
-        shutil.copyfile(os.path.join(VALIS, "examples", src), os.path.join(OUT, "circuits", dst))
+        shutil.copyfile(os.path.join(VALIS, "circuits", src), os.path.join(OUT, "circuits", dst))
     with open(os.path.join(OUT, "score.ttl"), "w") as f:
         f.write(turtle_score())
     with open(os.path.join(OUT, "song.ttl"), "w") as f:

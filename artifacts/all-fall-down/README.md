@@ -13,7 +13,7 @@ The first build gives the first four bars of the star tune as a promise (the lea
 plays all eight. The tune's last note is the second degree, B, so each time round it asks a question and the loop
 answers it. The eight-bar chord loop is Am F Dm E, F G Am E.
 
-The eight instruments are `../../../valis/examples/nursery-*.ttl` (copied to `circuits/`), described in the Valis repository
+The eight instruments are `../../../valis/circuits/nursery-*.ttl` (copied to `circuits/`), described in the Valis repository
 under `docs/examples.md` and built by its `scripts/nursery/nursery.py`: Humpty Kick, Rattle Snare, Ding Dong Hat, Black Sheep Bass,
 Twinkle Lead, Incy Wincy Arp, Rock-a-bye Pad and Wind-up Riser, plus a reverb return on the lead.
 
@@ -32,7 +32,7 @@ outro 16. A build ends in a snare roll and a gap, then the drop.
   with the part's circuit and its MCP server switched on, at ports 7677 and up in track order (the same as the order above).
 * `docs/lyrics.md`: a short, broken text for a speech synth, placed by section and bar, from a calm recitation to a voice that loses its place.
 * `voice.txt`: the same text as one word per quarter note, with `_` for a rest, for the SAM speech synthesizer plugin (`~/github/downspout/plugins/sam`). SAM settings: Elf voice, Transport mode, Step 1/4, Start Bar 1, Loop off, Speed 54.
-* `circuits/nursery-voice-vocoder.ttl`: a Valis effect placed after SAM on the `sam` track. SAM is the modulator of a 24-band vocoder and the carrier is an A minor open fifth of saws inside the circuit, so the voice sings a fixed chord and needs no MIDI. The voice is not in the stems or in mixes v1 to v3; it is in the Reaper project and in mix v4.
+* `circuits/nursery-voice-vocoder.ttl`: a Valis effect placed after SAM on the `sam` track. SAM is the modulator of a 24-band vocoder and the carrier is an A minor open fifth of saws inside the circuit, so the voice sings a fixed chord and needs no MIDI. The voice is not in mixes v1 to v3; it is in the Reaper project, in mix v4, and from v6 it is a `val:recorded` part of `song.ttl` mixed by `valis-song`.
 * `wavs/`: the stems (ignored by git; rebuild with `valis-song render song.ttl`).
 
 Rebuild: `python3 ../../scripts/all-fall-down/make.py`, then `valis-song score`, `render`, `stems`, `mix song.ttl --version vN --arc`.
@@ -44,7 +44,7 @@ Notes from making it:
   and the hat 45 dB under the kick in the drops. They are levelled alone now, by their own playing rms.
 * In the drops (v3) the kick is at -17 dB rms, bass -21 to -23, lead -24 to -21, arp and pad -26, snare -24, hat -29 (measured over the
   section including rests).
-* The lead stem sits at its limiter on the loudest notes (peak -1.0 dBFS); it is not clipped, but it is not loose either.
+* The lead stem peaks at its -1.0 dBFS ceiling, but only 3 samples in 10 million are above 0.85 of full scale, so it is not leaning on the limiter.
 * The listening is still to do: whether the star tune is the earworm (it is the simplest tune in the track, played in unison
   in the lead and, in the second drop, the bass), whether the toy-piano arp's octave-up echoes blur the tune in the intro, whether the hat is too
   bright (its spectral centroid is 12.7 kHz), and the transition from the break into the second build.
@@ -135,8 +135,8 @@ The composer pressed play, said it worked nicely and that the voice was a little
 ### 8. Mix v4 (composer and Claude)
 
 The composer asked for a mix and render with gain balancing. Claude tried to render the voice track through `reaper-mcp`, but the render
-produced no file in more than ten minutes (the same hang `render_stems` had earlier), so it was stopped. The composer soloed the `sam`
-track and rendered it in Reaper to `wavs/voice.wav` (48 kHz, 24-bit, with the raised vocoder level). Claude then measured the voice and the v3 mix
+produced no file in more than ten minutes (the same hang `render_stems` had earlier), so it was stopped. The composer later found the cause: Reaper was waiting at a modal "Nothing to render" dialog, because a track to render has to be selected and soloing does not count. The composer rendered the `sam`
+track in Reaper to `wavs/voice.wav` (48 kHz, 24-bit, with the raised vocoder level). Claude then measured the voice and the v3 mix
 for each section, set the voice's gain per section so its rms where it speaks is 7 dB under the section's mix rms (smoothed over one bar), added it
 to v3, applied a soft clip, and checked the result with [EBU R128](https://tech.ebu.ch/loudness) measurements: -11.5 LUFS, 11.4 LU,
 true peak -1.0 dBTP. The 7 dB figure is Claude's choice and has not been judged by ear.
@@ -147,3 +147,12 @@ true peak -1.0 dBTP. The 7 dB figure is Claude's choice and has not been judged 
 * The final mixdown in Reaper, where the voice level and balance can be set by ear. Reaper plays the raw instruments and not the normalised stems, so its balance differs from mixes v1 to v4.
 * Committing the work: both repositories have uncommitted changes.
 * The voice sings one fixed chord (A, E, A) and does not follow the chord loop; it is a choice that can be changed in the circuit.
+
+## Mix v6 (the voice as a part of the song)
+
+The voice is now a part of `song.ttl`: `:voice a val:Part ; val:recorded true ; val:level -22 ; val:highpass 150`, written by `make.py` (a
+`val:recorded` part has no circuit or MIDI, is not rendered or scored, and its `wavs/voice.wav` must already exist). `valis-song mix song.ttl
+--version v6 --arc` therefore levels it, applies the section levels and limits the sum like every other stem, and v4's hand-made gain and limiter
+are no longer needed. The voice's level, -22 dB rms where it speaks, is a first guess raised 5 dB from v5 (-27), where the voice sat 13 to 16 dB under
+the mix before the section levels. **v6: -10.6 LUFS (target -10, held by the -1 dBTP ceiling), loudness range 9.6 LU.** v4 and v5 are kept. Measured, not heard.
+`scripts/all-fall-down/voicemix.py` is the v4 method and is kept for comparison.

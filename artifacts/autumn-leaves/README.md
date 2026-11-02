@@ -23,13 +23,13 @@ Cm7, F7, Bbmaj7, Ebmaj7, Am7b5, D7, Gm, Gm.
 
 | Part | Circuit (in the Valis repository) | Notes |
 |---|---|---|
-| kick | `examples/dmx.ttl` | its own stem |
-| drums | `examples/dmx.ttl` | hats, snare, toms and fills |
-| perc | `examples/dmx.ttl` | shaker, tambourine, wood block |
-| bass | `examples/psych-bass.ttl` | saw and sub square, ladder filter, fuzz |
-| organ | `examples/tonewheel-organ.ttl`, then `examples/leslie.ttl` | the rotating speaker's speed is `midi/leslie-speed.mid` |
-| horns | `examples/horn-section.ttl` | stabs |
-| lead | `examples/fuzz-lead.ttl` | fuzz, glide, dotted-eighth echo; gaps left for a guitar |
+| kick | `circuits/dmx.ttl` | its own stem |
+| drums | `circuits/dmx.ttl` | hats, snare, toms and fills |
+| perc | `circuits/dmx.ttl` | shaker, tambourine, wood block |
+| bass | `circuits/psych-bass.ttl` | saw and sub square, ladder filter, fuzz |
+| organ | `circuits/tonewheel-organ.ttl`, then `circuits/leslie.ttl` | the rotating speaker's speed is `midi/leslie-speed.mid` |
+| horns | `circuits/horn-section.ttl` | stabs |
+| lead | `circuits/fuzz-lead.ttl` | fuzz, glide, dotted-eighth echo; gaps left for a guitar |
 
 ## Layout
 
