@@ -31,6 +31,8 @@ outro 16. A build ends in a snare roll and a gap, then the drop.
 * `all-fall-down-midi.rpp`: a Reaper project with a track for each part holding its MIDI and a Valis instrument already loaded
   with the part's circuit and its MCP server switched on, at ports 7677 and up in track order (the same as the order above).
 * `docs/lyrics.md`: a short, broken text for a speech synth, placed by section and bar, from a calm recitation to a voice that loses its place.
+* `voice.txt`: the same text as one word per quarter note, with `_` for a rest, for the SAM speech synthesizer plugin (`~/github/downspout/plugins/sam`). SAM settings: Elf voice, Transport mode, Step 1/4, Start Bar 1, Loop off, Speed 54.
+* `circuits/nursery-voice-vocoder.ttl`: a Valis effect placed after SAM on the `sam` track. SAM is the modulator of a 24-band vocoder and the carrier is an A minor open fifth of saws inside the circuit, so the voice sings a fixed chord and needs no MIDI. The voice is not in the stems or in mixes v1 to v3; it is in the Reaper project and in mix v4.
 * `wavs/`: the stems (ignored by git; rebuild with `valis-song render song.ttl`).
 
 Rebuild: `python3 ../../scripts/all-fall-down/make.py`, then `valis-song score`, `render`, `stems`, `mix song.ttl --version vN --arc`.
@@ -46,3 +48,102 @@ Notes from making it:
 * The listening is still to do: whether the star tune is the earworm (it is the simplest tune in the track, played in unison
   in the lead and, in the second drop, the bass), whether the toy-piano arp's octave-up echoes blur the tune in the intro, whether the hat is too
   bright (its spectral centroid is 12.7 kHz), and the transition from the break into the second build.
+
+## Mix v4 (with the voice)
+
+`mixes/all-fall-down-v4.wav` and `.flac` are v3 plus the vocoded SAM voice (`wavs/voice.wav`, rendered from Reaper with the `sam` track soloed).
+The voice is levelled in each section so that its rms, over the stretches where it speaks, is 7 dB under the mix rms of that section
+(`scripts/all-fall-down/voicemix.py`), with the gain smoothed over one bar. Gain applied to the voice: intro -5.3 dB, build 1 +1.1, drop 1 +4.9,
+break -1.8, build 2 +2.1, drop 2 +6.2, outro +2.1. The sum is soft clipped and measures -11.5 LUFS, loudness range 11.4 LU, true peak -1.0 dBTP.
+It is under the -10 LUFS target because holding -1 dBTP with the voice added cost 1.5 dB. Measured, not heard.
+
+## How it was made, end to end
+
+The track was made by Claude (in Claude Code) working with the composer, Danny, over one long session. The tools are the Valis
+repository's `valis-song`, `valis-render` and `valis-shot` programs, the `reaper-mcp` and `sam` MCP servers, and a running copy of
+[Reaper](https://www.reaper.fm/). The general route is in the Valis repository's `docs/making-a-track.md`. What follows is what was
+done here, in order, and who decided what. Everything about sound below is measured and not heard, except where it says the composer listened.
+
+### 1. The brief (composer)
+
+The composer asked for eight new circuits that would play the roles found on an electronic dance track (kick, snare, hat, bass, lead,
+arp, pad, riser) but would use Valis elements in combinations that had not been heard before, for a 140 bpm track with a
+conventional structure whose themes come from children's nursery rhymes. The aim stated was "something completely new". Later the
+composer asked for the track itself, left the choices to Claude's judgement, and asked for regular dance structure with "haunting earworms".
+
+### 2. The eight circuits (Claude)
+
+`scripts/nursery/nursery.py` in the Valis repository writes the eight circuits as Turtle files. Each was rendered on one note and
+measured: silent until played, peak in range, tuned where it is pitched (bass at 110 Hz for MIDI 45, lead at 440 Hz for MIDI 69),
+silent after release. An engine test (`tests/engine/NurseryInstrumentsTest.cpp`) holds those checks. Problems found and fixed on the way:
+a bass whose pitch was ambiguous (a fundamental sine was added), a riser that leaked sound with no note playing, a hat circuit that
+the lint test rejected because a control arc overwrote a fixed decay, and an arp pitch error that came from the measurement window and not the circuit.
+
+### 3. The plan and the generator (Claude)
+
+The plan was fixed as numbers before any note was written: key A minor, sections intro 16, build 8, drop 16, break 16, build 8, drop 24,
+outro 16 bars (104 bars, 3:00), chords Am F Dm E, F G Am E. The tunes are "Twinkle, Twinkle" and "Baa, Baa, Black Sheep" moved to the
+minor scale, "London Bridge" and "Mary Had a Little Lamb", all traditional. One script, `../../scripts/all-fall-down/make.py`, writes
+`score.ttl` (patterns, chords, tunes, plays and a little random timing) and `song.ttl` (tempo, sections, parts, levels). The first build
+plays only the first four bars of the star tune as a promise, and the first drop plays it in full.
+
+### 4. MIDI, stems and the first mixes (Claude)
+
+`valis-song score` wrote one MIDI file for each part, `valis-song render` rendered a stem for each part, and `valis-song stems` compared
+each stem with its MIDI bar by bar. `valis-song mix --arc` then levelled, panned and summed the stems and set the loudness. Three versions were made:
+
+* v1: the snare and hat were set to follow the kick with target levels. `val:follows` takes an offset from the leader's gain, so they came out 25 and 45 dB too quiet.
+  This is logged in the Valis `MISTAKES.md`, and `docs/songs.md` was corrected.
+* v2: the snare and hat were levelled alone, but the intro, break and outro were too low (loudness range 16.1 LU).
+* v3: section levels were raised and the lead and hat adjusted. -11.0 LUFS, 11.5 LU.
+
+### 5. Opening the track in Reaper (composer and Claude)
+
+The composer provided an empty Reaper project and the `reaper-mcp` server. Reaper's tools can add a plug-in to a track but cannot set its
+state, so Claude changed `valis-song reaper --midi` to write the project file itself, with each track holding its MIDI and a Valis instrument
+whose saved state already contains the part's circuit and has its MCP server switched on (ports 7677 and up). Claude wrote the state in
+Reaper's VST3 format, checked by a test that decodes it. The composer chose this route (the "embed state" option) from the options offered.
+
+The composer pressed play and reported that it "basically worked" but that the bass was far quieter than it should be. Claude found that
+the instrument state held no parameter values, so every parameter dropped to the bottom of its range, and fixed the plug-in so a state
+without parameters keeps the circuit's declared values. The composer rebuilt and installed Valis, restarted Reaper and reopened the project, and the bass was right.
+Saving the project from Reaper writes the zeroed state back, so the project is regenerated from the command and opened, not saved over.
+
+### 6. Documentation (composer's request, Claude's work)
+
+The composer asked for the process to be written down where Claude can find it. Claude wrote the Valis repository's `docs/making-a-track.md`,
+a "Making a track" section in `CLAUDE.md`, and links from the `write-a-song` skill and the manual. The composer also reported four failing
+GitHub Actions jobs in the downspout repository; Claude fixed a test that counted genres wrongly and two YAML values that needed quoting.
+Those downspout changes are uncommitted, and the composer makes the commits.
+
+### 7. The voice (composer and Claude)
+
+The composer asked for short, garbled lyrics for a speech synthesizer, as if the voice were having a breakdown. Claude wrote them as a table
+of section, bar, beat and words in `make.py`, which produces `docs/lyrics.md` (for reading) and `voice.txt` (one word per quarter note, `_` for a rest).
+The text moves from a calm recitation of "Twinkle, Twinkle" through broken repeats of "ring a ring o roses", "London Bridge" and "Humpty Dumpty" to a voice that loses its place.
+
+The composer liked the idea of passing the voice through a [vocoder](https://en.wikipedia.org/wiki/Vocoder) and loaded the SAM plug-in
+(`~/github/downspout/plugins/sam`, which has its own MCP server) into the Reaper project, on a track named `sam`. Claude then:
+
+1. wrote `nursery-voice-vocoder`, a Valis effect with a 24-band vocoder whose carrier is a chord of saws and high noise inside the circuit,
+   and checked that it is silent on silence and sings a pitched tone from a test input;
+2. set SAM over MCP (Elf voice, Transport mode, one word per quarter note, start bar 1, loop off, speed 54) and loaded the 401 slots of text;
+3. added a Valis instance after SAM with `reaper-mcp`. A new instance has its MCP server off, so the composer switched it on, and Claude loaded the vocoder circuit over its port (7685).
+
+The composer pressed play, said it worked nicely and that the voice was a little quiet, and raised the vocoder's output level in Reaper.
+
+### 8. Mix v4 (composer and Claude)
+
+The composer asked for a mix and render with gain balancing. Claude tried to render the voice track through `reaper-mcp`, but the render
+produced no file in more than ten minutes (the same hang `render_stems` had earlier), so it was stopped. The composer soloed the `sam`
+track and rendered it in Reaper to `wavs/voice.wav` (48 kHz, 24-bit, with the raised vocoder level). Claude then measured the voice and the v3 mix
+for each section, set the voice's gain per section so its rms where it speaks is 7 dB under the section's mix rms (smoothed over one bar), added it
+to v3, applied a soft clip, and checked the result with [EBU R128](https://tech.ebu.ch/loudness) measurements: -11.5 LUFS, 11.4 LU,
+true peak -1.0 dBTP. The 7 dB figure is Claude's choice and has not been judged by ear.
+
+### What is still the composer's
+
+* Listening to the track, and to whether the voice level and the star-tune hook work (the questions listed above).
+* The final mixdown in Reaper, where the voice level and balance can be set by ear. Reaper plays the raw instruments and not the normalised stems, so its balance differs from mixes v1 to v4.
+* Committing the work: both repositories have uncommitted changes.
+* The voice sings one fixed chord (A, E, A) and does not follow the chord loop; it is a choice that can be changed in the circuit.
