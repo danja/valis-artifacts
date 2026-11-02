@@ -1,0 +1,46 @@
+# song.ttl
+#
+# "Cumbia Cuántica": the layout and the mix as data. The notes are in midi/, played by the circuits in circuits/;
+# the arpeggio and the talk box are rendered by scripts/cumbia-cuantica/make.py (recorded) because one has no notes and the
+# other is shaped by a voice. See README.md.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:cumbia-cuantica#> .
+
+:song a val:Song ;
+    val:title "Cumbia Cuántica" ;
+    val:tempo 94 ;
+    val:loudness -11 ;
+    val:fadeSeconds 6 ;
+    val:roomAmount 0.12 ;
+    val:roomDecay 0.35 ;
+    val:roomLowpass 5000 ;
+    val:drive 1.4 ;
+    val:hasSection :intro , :cumbia1 , :quantise , :talk , :fracture , :cumbia2 , :outro ;
+    val:hasPart :shakers , :guacha , :hand , :guitarron , :flute , :surf , :fuzz , :buzz , :ghost , :ghostbreak , :arp , :talkbox ;
+    val:hasReturn :surfverb , :flutehall .
+
+:intro a val:Section ; val:index 1 ; val:bars 8 ; val:level 1.5 .
+:cumbia1 a val:Section ; val:index 2 ; val:bars 16 ; val:level 0.0 .
+:quantise a val:Section ; val:index 3 ; val:bars 16 ; val:level 0.0 .
+:talk a val:Section ; val:index 4 ; val:bars 16 ; val:level 3.0 .
+:fracture a val:Section ; val:index 5 ; val:bars 8 ; val:level 0.0 .
+:cumbia2 a val:Section ; val:index 6 ; val:bars 16 ; val:level 0.5 .
+:outro a val:Section ; val:index 7 ; val:bars 8 ; val:level 1.0 .
+
+:shakers a val:Part ; val:index 1 ; val:circuit "circuits/latin-perc.ttl" ; val:level -26 ; val:pan 0.25 ; val:highpass 250 .
+:guacha a val:Part ; val:index 2 ; val:circuit "circuits/latin-perc.ttl" ; val:level -25 ; val:pan -0.3 ; val:highpass 200 .
+:hand a val:Part ; val:index 3 ; val:circuit "circuits/latin-perc.ttl" ; val:level -22 ; val:pan 0.0 ; val:highpass 70 .
+:guitarron a val:Part ; val:index 4 ; val:circuit "circuits/guitarron.ttl" ; val:level -21 ; val:pan 0.0 ; val:highpass 0 .
+:flute a val:Part ; val:index 5 ; val:circuit "circuits/flute.ttl" ; val:level -23 ; val:pan 0.1 ; val:highpass 150 .
+:surf a val:Part ; val:index 6 ; val:circuit "circuits/surf.ttl" ; val:level -23 ; val:pan -0.35 ; val:highpass 120 .
+:fuzz a val:Part ; val:index 7 ; val:circuit "circuits/fuzz.ttl" ; val:level -24 ; val:pan 0.0 ; val:highpass 70 .
+:buzz a val:Part ; val:index 8 ; val:circuit "circuits/buzz.ttl" ; val:level -27 ; val:pan 0.3 ; val:highpass 140 .
+:ghost a val:Part ; val:index 9 ; val:circuit "circuits/ghost.ttl" ; val:level -31 ; val:pan -0.15 ; val:highpass 90 .
+:ghostbreak a val:Part ; val:index 10 ; val:circuit "circuits/ghostbreak.ttl" ; val:level -29 ; val:pan 0.2 ; val:highpass 90 .
+:arp a val:Part ; val:index 11 ; val:recorded true ; val:level -27 ; val:pan 0.4 ; val:highpass 150 .
+:talkbox a val:Part ; val:index 12 ; val:recorded true ; val:level -24 ; val:pan 0.0 ; val:highpass 120 .
+
+:surfverb a val:Return ; val:index 1 ; val:source :surf ; val:circuit "circuits/reverb-return.ttl" ; val:level -30 ; val:pan 0.4 .
+:flutehall a val:Return ; val:index 2 ; val:source :flute ; val:circuit "circuits/reverb-return.ttl" ; val:level -32 ; val:pan -0.4 .
