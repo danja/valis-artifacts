@@ -30,6 +30,7 @@ outro 16. A build ends in a snare roll and a gap, then the drop.
 * `midi/`: kick, snare, hat, bass, lead, arp, pad, riser (written by `valis-song score`).
 * `all-fall-down-midi.rpp`: a Reaper project with a track for each part holding its MIDI and a Valis instrument already loaded
   with the part's circuit and its MCP server switched on, at ports 7677 and up in track order (the same as the order above).
+* `docs/lyrics.md`: a short, broken text for a speech synth, placed by section and bar, from a calm recitation to a voice that loses its place.
 * `wavs/`: the stems (ignored by git; rebuild with `valis-song render song.ttl`).
 
 Rebuild: `python3 ../../scripts/all-fall-down/make.py`, then `valis-song score`, `render`, `stems`, `mix song.ttl --version vN --arc`.
