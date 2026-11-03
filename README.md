@@ -16,6 +16,7 @@ Each piece here is a score played by Valis circuits, rendered to one stem per pa
 | [Interstate Rain](artifacts/interstate-rain/README.md) | A three-minute instrumental in E Dorian, in the manner of a late-1960s rock band with a jazz rhythm section: Rhodes-style piano, soft bass, a light sampled kit, a clean guitar into an echo and recorded rain and thunder fetched from freesound.org over MCP. Mix: [`interstate-rain-v1.flac`](artifacts/interstate-rain/mixes/interstate-rain-v1.flac) (24-bit). |
 | [Street Hammer](artifacts/street-hammer/README.md) | Hardcore techno at 170 bpm in G minor, inspired by Orff's "Gassenhauer": a bouncing marimba figure under an original hoover tune, over a gabber kick, an offbeat distorted bass and a 909, with three heavy drops. Mix: [`street-hammer-v1.flac`](artifacts/street-hammer/mixes/street-hammer-v1.flac). Measured, not heard. |
 
+| [Ilkley Allegretto](artifacts/ilkley-allegretto/README.md) | "On Ilkla Moor Baht 'at" over the rhythm of the slow movement of Beethoven's Seventh Symphony, 76 bpm in A major and A minor. Trumpets carry the tune over a cello and nylon guitar playing Beethoven, and in the finale the two play together. Mix: [`ilkley-allegretto-v1.flac`](artifacts/ilkley-allegretto/mixes/ilkley-allegretto-v1.flac). Measured, not heard. |
 "Measured, not heard" means the mix was checked with measurements (loudness, peaks, spectrum) and not by listening.
 
 The layout of the repository is in [`docs/dir-layout.md`](docs/dir-layout.md).

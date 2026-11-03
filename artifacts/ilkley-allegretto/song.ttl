@@ -1,0 +1,40 @@
+# song.ttl
+#
+# "Ilkley Allegretto": the layout and the mix as data. The notes are in midi/, played by the circuits in circuits/.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:ilkley-allegretto#> .
+
+:song a val:Song ;
+    val:title "Ilkley Allegretto" ;
+    val:tempo 76 ;
+    val:loudness -14 ;
+    val:fadeSeconds 6 ;
+    val:roomAmount 0.18 ;
+    val:roomDecay 0.45 ;
+    val:roomLowpass 6000 ;
+    val:drive 1.2 ;
+    val:hasSection :intro , :theme , :ilkla , :dialogue , :finale , :outro ;
+    val:hasPart :kick , :sub , :shakers , :cello , :guitar , :strings , :trumpets , :flute , :horns ;
+    val:hasReturn :brasshall , :cellohall .
+
+:intro a val:Section ; val:index 1 ; val:bars 2 ; val:level 0.0 .
+:theme a val:Section ; val:index 2 ; val:bars 8 ; val:level 0.0 .
+:ilkla a val:Section ; val:index 3 ; val:bars 21 ; val:level 1.0 .
+:dialogue a val:Section ; val:index 4 ; val:bars 21 ; val:level 0.0 .
+:finale a val:Section ; val:index 5 ; val:bars 8 ; val:level 2.5 .
+:outro a val:Section ; val:index 6 ; val:bars 6 ; val:level -1.5 .
+
+:kick a val:Part ; val:index 1 ; val:circuit "circuits/kick.ttl" ; val:level -24 ; val:pan 0.0 ; val:highpass 0 .
+:sub a val:Part ; val:index 2 ; val:circuit "circuits/sub.ttl" ; val:level -23 ; val:pan 0.0 ; val:highpass 0 .
+:shakers a val:Part ; val:index 3 ; val:circuit "circuits/shakers.ttl" ; val:level -31 ; val:pan 0.3 ; val:highpass 300 .
+:cello a val:Part ; val:index 4 ; val:circuit "circuits/cello.ttl" ; val:level -22 ; val:pan -0.2 ; val:highpass 60 .
+:guitar a val:Part ; val:index 5 ; val:circuit "circuits/guitar.ttl" ; val:level -25 ; val:pan 0.25 ; val:highpass 100 .
+:strings a val:Part ; val:index 6 ; val:circuit "circuits/strings.ttl" ; val:level -29 ; val:pan 0.0 ; val:highpass 150 .
+:trumpets a val:Part ; val:index 7 ; val:circuit "circuits/trumpets.ttl" ; val:level -24 ; val:pan 0.0 ; val:highpass 150 .
+:flute a val:Part ; val:index 8 ; val:circuit "circuits/flute.ttl" ; val:level -28 ; val:pan 0.15 ; val:highpass 250 .
+:horns a val:Part ; val:index 9 ; val:circuit "circuits/horns.ttl" ; val:level -28 ; val:pan -0.25 ; val:highpass 150 .
+
+:brasshall a val:Return ; val:index 1 ; val:source :trumpets ; val:circuit "circuits/reverb-return.ttl" ; val:level -30 ; val:pan 0.4 .
+:cellohall a val:Return ; val:index 2 ; val:source :cello ; val:circuit "circuits/reverb-return.ttl" ; val:level -31 ; val:pan -0.4 .
