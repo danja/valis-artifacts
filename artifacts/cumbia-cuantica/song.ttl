@@ -30,7 +30,7 @@
 :outro a val:Section ; val:index 7 ; val:bars 8 ; val:level 1.0 .
 
 :shakers a val:Part ; val:index 1 ; val:circuit "circuits/latin-perc.ttl" ; val:level -26 ; val:pan 0.25 ; val:highpass 250 .
-:guacha a val:Part ; val:index 2 ; val:circuit "circuits/latin-perc.ttl" ; val:level -25 ; val:pan -0.3 ; val:highpass 200 .
+:guacha a val:Part ; val:index 2 ; val:circuit "circuits/guacharaca.ttl" ; val:level -25 ; val:pan -0.3 ; val:highpass 200 .
 :hand a val:Part ; val:index 3 ; val:circuit "circuits/latin-perc.ttl" ; val:level -22 ; val:pan 0.0 ; val:highpass 70 .
 :guitarron a val:Part ; val:index 4 ; val:circuit "circuits/guitarron.ttl" ; val:level -21 ; val:pan 0.0 ; val:highpass 0 .
 :flute a val:Part ; val:index 5 ; val:circuit "circuits/flute.ttl" ; val:level -23 ; val:pan 0.1 ; val:highpass 150 .

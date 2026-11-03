@@ -74,6 +74,7 @@ def set_prop(ttl, node, prop, value):
 
 CIRCUITS = {   # name: (source circuit, [(node, property, value)])
     "latin-perc": ("latin-perc", []),
+    "guacharaca": ("guacharaca", []),
     "guitarron": ("guitarron", []),
     "flute": ("flute", []),
     "reverb-return": ("reverb-return", []),
@@ -138,7 +139,7 @@ def chord_of(sec, i):
 
 PARTS = [  # name, circuit, level dB (rms where it plays), pan, highpass, follows
     ("shakers", "latin-perc", -26, 0.25, 250, None),
-    ("guacha", "latin-perc", -25, -0.3, 200, None),
+    ("guacha", "guacharaca", -25, -0.3, 200, None),
     ("hand", "latin-perc", -22, 0.0, 70, None),
     ("guitarron", "guitarron", -21, 0.0, 0, None),
     ("flute", "flute", -23, 0.1, 150, None),

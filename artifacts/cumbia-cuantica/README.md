@@ -27,7 +27,8 @@ that is set differently is described by the line `scripts/cumbia-cuantica/make.p
 
 | Part | Circuit | Notes |
 |---|---|---|
-| shakers, guacha, hand | `latin-perc` | Maracas (note 70), guacharaca scrape (73 down, 74 up), bombo (36), llamador as a muted bongo (61), tambor alegre as congas (62 to 64). |
+| guacha | `guacharaca` | The scraped tube on its own circuit, with controls for each stroke: note 73 down, 74 up. |
+| shakers, hand | `latin-perc` | Maracas (note 70), bombo (36), llamador as a muted bongo (61), tambor alegre as congas (62 to 64). |
 | guitarron | `guitarron` | Root and fifth, "three and one": the cumbia bass figure. |
 | flute | `flute` | The gaita-style tune. Measured in tune from A3 to A5 (within 4 cents). |
 | surf | `bassman-amp` | **New.** Input pushed to +14 dB so the valve breaks up, middle scooped to 0.25, treble 0.7. A plucked string through the tone stack of a Fender Bassman, in the manner of the [chicha](https://en.wikipedia.org/wiki/Chicha_music) guitar. A reverb return follows it. |
