@@ -1,7 +1,6 @@
 # scripts/tide-table/vocal-guide.py
 #
-# The lyrics of "Tide Table", a guide melody with one MIDI note per syllable, and lyrics.md, which lays the words against the bars and
-# says how to sing them. The bars are those of make.py (72 bars at 78 bpm, counted from 0 here and from 1 in the document).
+# The lyrics of "Tide Table", a guide melody with one MIDI note per syllable. lyrics.md lays the words against the bars and says how to sing them; it was written from this output. The bars are those of make.py (72 bars at 78 bpm, counted from 0 here and from 1 in the document).
 # The guide is rendered by circuits/emulator-choir.ttl to wavs/vocal-guide.wav and is not in the mix.
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -77,5 +76,3 @@ os.makedirs(os.path.join(ART, "midi"), exist_ok=True)
 midiw.write(os.path.join(ART, "midi", "vocal.mid"), sorted(notes), BPM)
 print(len(notes), "syllables,", len(doc), "lines")
 
-import json
-json.dump(doc, open(os.path.join(HERE, "lines.json"), "w"))

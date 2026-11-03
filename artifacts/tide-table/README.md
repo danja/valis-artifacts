@@ -36,6 +36,12 @@ A slow instrumental in D minor at 78 bpm, 72 bars, about 3 min 45 s. Every sound
 purpose: the memory is 2.5 dB under the tide and the flood 2.5 dB over it. `tide-table-midi.rpp` opens the ten MIDI parts in Reaper with the
 mix's volumes and pans; the two reverb returns are not tracks.
 
+## Voice
+
+No vocal is recorded. [`lyrics.md`](lyrics.md) has the words laid against the bars, the pitch of every syllable, and notes on how to sing them.
+`wavs/vocal-guide.wav` is a guide melody (one note per syllable, played by `emulator-choir`) and `guide/tide-table-v1-with-guide.flac` is the mix with
+the guide on top, to sing along to. The guide is not in the mix. Made by `scripts/tide-table/vocal-guide.py`; measured, not heard.
+
 ## Notes
 
 * The cello stem clipped when the tune was played an octave lower in the ebb (bar 66, A3 then G3), and in the first render of the intro. Moving the tune

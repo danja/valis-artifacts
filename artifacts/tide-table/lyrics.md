@@ -6,7 +6,7 @@ it is certain because it comes back. Nothing in the music hurries.
 
 No vocal has been recorded. `wavs/vocal-guide.wav` is a guide: one note for each syllable, played by the choir circuit, so a singer can hear
 where each word falls and how high it sits. `guide/tide-table-v1-with-guide.flac` is the mix with the guide laid on top of it. Both are measured and
-not heard. The notes and words are made by `scripts/tide-table/vocal-guide.py`, which also writes this file.
+not heard. The notes and words are made by `scripts/tide-table/vocal-guide.py`.  This file was written from its output by hand.
 
 ## Where the voice sings
 
