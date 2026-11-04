@@ -8,7 +8,7 @@ material is new. The brief is in [`../../sources/big-pickle/prompt.md`](../../so
 
 Everything here is **measured, not heard**. What still needs a listener is listed at the end.
 
-* [`mixes/big-pickle-v5.flac`](mixes/big-pickle-v5.flac): the mix. -10.0 LUFS integrated, loudness range
+* [`mixes/big-pickle-v6.flac`](mixes/big-pickle-v6.flac): the mix. -10.0 LUFS integrated, loudness range
   8.1 LU, true peak -1.6 dBTP, no clipped or non-finite samples.
 * `midi/`: `kick`, `kit`, `bass`, `stab`, `pad`, `arp`, `lead`, `riser`.
 * `circuits/`: the ten circuits that played it (five written for the track, two adapted from Valis
@@ -58,15 +58,15 @@ drop lands on a gap.
 | `y2k-bleep.ttl` | A square and a sine an octave up through a [bit and sample-rate reducer](https://en.wikipedia.org/wiki/Bitcrusher) at 9 bits, the grain of a 2000 game console. |
 | `y2k-riser.ttl` | Noise through a band-pass that opens from a rumble to a hiss, a saw climbing under it and a square whistle an octave up, all on a 6.4 s envelope, which is four bars at 138 bpm. |
 | `y2k-stab.ttl` | Eight voices of two detuned saws from `circuits/prophet-5.ttl`, with a faster envelope, more detune and a chorus. |
-| `y2k-pad.ttl` | Eight voices of three saws from `circuits/quadra-strings.ttl`, with a 900 ms attack, a 900 ms release and a darker filter. |
+| `y2k-pad.ttl` | Eight voices of three saws from `circuits/quadra-strings.ttl`, split into a sharp half and a flat half that leave on the left and the right, with a 900 ms attack, a 900 ms release and a darker filter. The stereo split is the width: the stem measures 0.462 correlation. |
 | `909.ttl` | The [TR-909](https://en.wikipedia.org/wiki/Roland_TR-909) kit from the Valis examples, unchanged. |
 | `reverb-return.ttl` | The Valis reverb return, unchanged, one for the stabs and one for the pad. |
 | `dub-delay.ttl` | The Valis dub echo, with the delay retimed to a dotted eighth at 138 bpm (326 ms) and the feedback reduced. |
 
 ## The mix
 
-`valis-song mix song.ttl --version v5 --arc`, then `ffmpeg` to FLAC. Earlier working mixes v1 to v4 are
-kept as WAVs, which are not in git.
+`valis-song mix song.ttl --version v6 --arc`, then `ffmpeg` to FLAC. Earlier working mixes v1 to v4 are
+kept as WAVs, which are not in git. v5 (mono pad) is also kept as a WAV.
 
 | | |
 |---|---|
@@ -75,7 +75,7 @@ kept as WAVs, which are not in git.
 | True peak | -1.6 dBTP |
 | Peak / RMS | -1.60 dBFS / -12.21 dB |
 | Clipped samples / non-finite | 0 / 0 |
-| Stereo correlation | 0.950, median width -15.8 dB, balance +0.46 dB |
+| Stereo correlation | 0.931, median width -14.4 dB, balance +0.49 dB |
 | Spectral centroid | 570 Hz; 4.6% of the power above 2 kHz |
 
 Section levels as mixed: intro -19.4, build 1 -13.1, drop 1 -11.4, break 1 -15.1, build 2 -13.1, drop 2
@@ -95,7 +95,7 @@ Balance over drop 2 (2:05 to 2:47, each stem's rms with its mix gain applied):
 Stem checks (`valis-song stems`): all eleven found, every bar that the score gives notes has sound, no problems
 reported. The kick peaks at -1.0 dBFS, on its limiter, but 0.0008% of its samples are above 0.85, so it touches
 the ceiling on transients rather than sitting on it. The kit peaks at -1.0 dBFS too, with no sample above 0.85.
-Playing rms of the stems before levelling: kick -11.7, bass -18.3, stab -20.3, arpeggio -21.4, pad -24.6, kit
+Playing rms of the stems before levelling: kick -11.7, bass -18.3, stab -20.3, arpeggio -21.4, pad -26.5, kit
 -25.1, lead -26.1, riser -27.8 dB.
 
 ## Measured and not heard
@@ -105,10 +105,12 @@ Playing rms of the stems before levelling: kick -11.7, bass -18.3, stab -20.3, a
   not a confirmation that the groove sits right.
 * The key detector reads C major (0.81). The progression is A minor, its relative major, so that is also
   expected.
-* Every instrument stem is mono (correlation 1.000). The width in the mix comes only from pan and from the
-  effect returns, which is why the whole mix correlates at 0.950. This is in line with the other Valis mixes
-  ("Street Hammer" measures 0.982), but it is narrower than a commercial record of the period.
-* `valis-shot is mixes/big-pickle-v5.wav "driving techno with a hard kick and risers"` answers yes, with a
+* All but the pad are mono stems (correlation 1.000). The pad is a stereo stem at a correlation of 0.462
+  (median width -4.35 dB): its sharp half leaves on the left and its flat half on the right. The width in
+  the mix comes from that plus the pan of the mono stems and the effect returns, which is why the whole
+  mix correlates at 0.931. This is in line with the other Valis mixes ("Street Hammer" measures 0.982),
+  but it is narrower than a commercial record of the period.
+* `valis-shot is mixes/big-pickle-v6.wav "driving techno with a hard kick and risers"` answers yes, with a
   share of 0.572, first of 21 candidates (next: "a synthesizer keyboard preset" at 0.223). That is the
   neural ears' judgement against twenty rival descriptions, not a listener's.
 
@@ -134,3 +136,7 @@ Playing rms of the stems before levelling: kick -11.7, bass -18.3, stab -20.3, a
   pink-noise tilt and its correlation was 0.969. Lifting the kit and the arpeggio and spreading the three
   returns to +/-0.55 and 0.60 raised the 8 kHz band of drop 2 by 0.8 dB and moved the correlation to 0.950.
   The top is still 3.1 dB darker than a pink-noise tilt.
+* In v6 the pad was split into a sharp half and a flat half, which makes the stem stereo at a correlation
+  of 0.462. The stem level dropped from -24.6 to -26.5 dB, because the level is measured on the mono sum
+  (L + R) / 2, 3 dB below the stereo power of a wide signal, while the mix level stayed at -28.5. The pad
+  is therefore about 3 dB louder in the mix than it was in v5.

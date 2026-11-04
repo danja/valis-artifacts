@@ -47,7 +47,7 @@ PARTS = [
     ("kit",   "909.ttl",       -24.5, 0.00, 130),
     ("bass",  "y2k-bass.ttl",  -20,  0.00,  30),
     ("stab",  "y2k-stab.ttl",  -22.5, 0.10, 220),
-    ("pad",   "y2k-pad.ttl",   -28.5, -0.10, 180),
+    ("pad",   "y2k-pad.ttl",   -28.5, 0.00, 180),
     ("arp",   "y2k-bleep.ttl", -26,  0.25, 500),
     ("lead",  "y2k-lead.ttl",  -22,  0.05, 260),
     ("riser", "y2k-riser.ttl", -28,  0.00, 300),
@@ -682,6 +682,181 @@ def copy_edited(src_name, dst_name, header, edits):
         f.write(text)
 
 
+def y2k_pad():
+    """A stereo pad, written out rather than copied from quadra-strings.ttl.
+
+    Each voice sums its three saws twice: the sharp copy leaves on the left and the flat copy on the
+    right, so the two halves of the stem carry different signal. The width is in the recording, not
+    added by the mixer.
+    """
+    def arcs(pairs):
+        ids, blocks = [], []
+        for a, ap, b, bp in pairs:
+            aid = "a_%s_%s__%s_%s" % (a, ap, b, bp)
+            ids.append(":" + aid)
+            blocks.append(':%s a val:Arc ;\n    val:from [ val:node :%s ; val:port "%s" ] ;\n'
+                          '    val:to   [ val:node :%s ; val:port "%s" ] .' % (aid, a, ap, b, bp))
+        return " ,\n        ".join(ids), "\n\n".join(blocks)
+
+    voice_arcs = [("pitch", "out", "sawA", "frequency"),
+                  ("pitch", "out", "up", "a"),
+                  ("up", "out", "sawB", "frequency"),
+                  ("pitch", "out", "down", "a"),
+                  ("down", "out", "sawC", "frequency"),
+                  ("sawA", "out", "sumL", "in"),
+                  ("sawB", "out", "sumL", "in"),
+                  ("sawA", "out", "sumR", "in"),
+                  ("sawC", "out", "sumR", "in"),
+                  ("sumL", "out", "vcaL", "in"),
+                  ("sumR", "out", "vcaR", "in"),
+                  ("env", "out", "vcaL", "cv"),
+                  ("env", "out", "vcaR", "cv")]
+
+    top_arcs = []
+    for side in ("L", "R"):
+        top_arcs += [("poly", "left" if side == "L" else "right", "tone" + side, "in"),
+                     ("tone" + side, "out", "thin" + side, "in"),
+                     ("thin" + side, "out", "ens1" + side, "in"),
+                     ("ens1" + side, "out", "ens2" + side, "in"),
+                     ("ens2" + side, "out", "swirl" + side, "in"),
+                     ("swirl" + side, "out", "room" + side, "in"),
+                     ("room" + side, "out", "trim" + side, "in"),
+                     ("trim" + side, "out", "limit" + side, "in"),
+                     ("limit" + side, "out", "out", "left" if side == "L" else "right")]
+
+    voice_ids, voice_blocks = arcs(voice_arcs)
+    top_ids, top_blocks = arcs(top_arcs)
+
+    return """# circuits/y2k-pad.ttl
+#
+# A wide pad: eight voices of three saws, the sharp copy leaving on the left and the flat copy on the
+# right, each side then through a soft low-pass, a high-pass, two choruses, a phaser and a room, with a
+# slow attack and a long release. Based on the string-machine voice in circuits/quadra-strings.ttl, with
+# a slower envelope, a darker tone and a longer room. The stereo split is what makes the pad wide.
+
+""" + HEADER % "y2kpad" + """
+
+:Voice a val:Subcircuit ;
+    rdfs:label "Voice" ;
+
+    lv2:port [ a lv2:OutputPort , lv2:AudioPort ;
+               lv2:symbol "left" ; lv2:name "Left" ;
+               val:node :vcaL ; val:port "out" ] ,
+
+             [ a lv2:OutputPort , lv2:AudioPort ;
+               lv2:symbol "right" ; lv2:name "Right" ;
+               val:node :vcaR ; val:port "out" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ;
+               lv2:symbol "attack" ; lv2:name "Attack" ;
+               lv2:default 900.0 ; lv2:minimum 5 ; lv2:maximum 3000 ;
+               lv2:portProperty lv2:logarithmic ;
+               units:unit units:ms ;
+               val:node :env ; val:port "attack" ] ,
+
+             [ a lv2:InputPort , lv2:ControlPort ;
+               lv2:symbol "release" ; lv2:name "Release" ;
+               lv2:default 900.0 ; lv2:minimum 20 ; lv2:maximum 4000 ;
+               lv2:portProperty lv2:logarithmic ;
+               units:unit units:ms ;
+               val:node :env ; val:port "release" ] ;
+
+    val:element :pitch , :up , :down , :sawA , :sawB , :sawC , :sumL , :sumR , :env , :vcaL , :vcaR ;
+    val:arc """ + voice_ids + """ .
+
+:pitch a val:MidiPitch .
+
+:up a val:ControlMultiply ;
+    val:b 1.0065 .
+
+:down a val:ControlMultiply ;
+    val:b 0.9935 .
+
+:sawA a val:Oscillator ;
+    val:shape 1 .
+
+:sawB a val:Oscillator ;
+    val:shape 1 .
+
+:sawC a val:Oscillator ;
+    val:shape 1 .
+
+:sumL a val:Mixer .
+
+:sumR a val:Mixer .
+
+:env a val:Envelope ;
+    val:attack 900.0 ;
+    val:decay 600.0 ;
+    val:sustain 1.0 ;
+    val:release 900.0 .
+
+:vcaL a val:VCA .
+
+:vcaR a val:VCA .
+
+""" + voice_blocks + """
+
+:y2kpad a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    trn:genre "Pad", "Ensemble", "Techno" ;
+    rdfs:label "Y2K pad" ;
+    val:element :poly , :toneL , :toneR , :thinL , :thinR , :ens1L , :ens2L , :ens1R , :ens2R ,
+        :swirlL , :swirlR , :roomL , :roomR , :trimL , :trimR , :limitL , :limitR , :out ;
+    val:arc """ + top_ids + """ .
+
+:poly a :Voice ; val:voices 8 .
+
+:toneL a val:OnePole ; val:mode 0 ; val:cutoff 3000.0 .
+:toneR a val:OnePole ; val:mode 0 ; val:cutoff 3000.0 .
+
+:thinL a val:OnePole ; val:mode 1 ; val:cutoff 180.0 .
+:thinR a val:OnePole ; val:mode 1 ; val:cutoff 180.0 .
+
+:ens1L a val:Chorus ; val:rate 0.55 ; val:depth 3.0 ; val:mix 0.5 .
+:ens2L a val:Chorus ; val:rate 0.83 ; val:depth 2.2 ; val:mix 0.5 .
+:ens1R a val:Chorus ; val:rate 0.55 ; val:depth 3.0 ; val:mix 0.5 .
+:ens2R a val:Chorus ; val:rate 0.83 ; val:depth 2.2 ; val:mix 0.5 .
+
+:swirlL a val:Phaser ; val:rate 0.18 ; val:depth 0.7 ; val:feedback 0.25 ; val:mix 0.3 .
+:swirlR a val:Phaser ; val:rate 0.18 ; val:depth 0.7 ; val:feedback 0.25 ; val:mix 0.3 .
+
+:roomL a val:Reverb ; val:size 1.1 ; val:decay 2.2 ; val:damping 0.5 ; val:mix 0.35 .
+:roomR a val:Reverb ; val:size 1.1 ; val:decay 2.2 ; val:damping 0.5 ; val:mix 0.35 .
+
+:trimL a val:Gain ; val:gain -12.0 .
+:trimR a val:Gain ; val:gain -12.0 .
+
+:limitL a val:Limiter ; val:ceiling -1.0 .
+:limitR a val:Limiter ; val:ceiling -1.0 .
+
+:out a val:Output .
+
+""" + top_blocks + """
+
+:p0 a val:Param ; val:slot 0 ;
+    val:target :poly ; val:property val:attack ;
+    lv2:name "Attack" ; lv2:symbol "attack" ;
+    lv2:minimum 5 ; lv2:maximum 3000 ;
+    val:section "Envelope" ;
+    units:unit units:ms .
+:p1 a val:Param ; val:slot 1 ;
+    val:target :poly ; val:property val:release ;
+    lv2:name "Release" ; lv2:symbol "release" ;
+    lv2:minimum 20 ; lv2:maximum 4000 ;
+    val:section "Envelope" ;
+    units:unit units:ms .
+:p2 a val:Param ; val:slot 2 ;
+    val:target :toneL , :toneR ; val:property val:cutoff ;
+    lv2:name "Brightness" ; lv2:symbol "brightness" ;
+    lv2:minimum 600 ; lv2:maximum 12000 ;
+    val:section "Tone" ;
+    units:unit units:hertz .
+"""
+
+
 def main():
     os.makedirs(os.path.join(OUT, "circuits"), exist_ok=True)
     for circuit, fn in ((y2k_kick, "y2k-kick.ttl"), (y2k_bass, "y2k-bass.ttl"),
@@ -713,21 +888,8 @@ def main():
                  ("val:release 320.0 .", "val:release 220.0 .", 1),
                  ("val:mix 0.3 .", "val:mix 0.45 .", 1),
                  ("val:gain -9.0 .", "val:gain -8.0 .", 1)])
-    copy_edited("quadra-strings.ttl", "y2k-pad.ttl",
-                """# circuits/y2k-pad.ttl
-#
-# A wide pad: eight voices of three saws, one sharp and one flat, through a soft low-pass, two choruses and a
-# phaser, with a slow attack and a long release. Based on the string-machine voice in circuits/quadra-strings.ttl,
-# with a slower envelope, a darker tone and a longer room.""",
-                [("lv2:default 260.0", "lv2:default 900.0", 1),
-                 ("lv2:default 520.0", "lv2:default 900.0", 1),
-                 ("lv2:default 4200.0", "lv2:default 3000.0", 1),
-                 ("val:attack 260.0 ;", "val:attack 900.0 ;", 1),
-                 ("val:decay 300.0 ;", "val:decay 600.0 ;", 1),
-                 ("val:release 520.0 .", "val:release 900.0 .", 1),
-                 ("val:cutoff 4200.0 .", "val:cutoff 3000.0 .", 1),
-                 ("val:mix 0.2 .", "val:mix 0.35 .", 1),
-                 ("val:gain -10.0 .", "val:gain -12.0 .", 1)])
+    with open(os.path.join(OUT, "circuits", "y2k-pad.ttl"), "w") as f:
+        f.write(y2k_pad())
     copy_edited("dub-delay.ttl", "dub-delay.ttl",
                 """# circuits/dub-delay.ttl
 #

@@ -37,7 +37,7 @@
 :kit a val:Part ; val:index 2 ; val:circuit "circuits/909.ttl" ; val:level -24.5 ; val:pan 0 ; val:highpass 130 .
 :bass a val:Part ; val:index 3 ; val:circuit "circuits/y2k-bass.ttl" ; val:level -20 ; val:pan 0 ; val:highpass 30 .
 :stab a val:Part ; val:index 4 ; val:circuit "circuits/y2k-stab.ttl" ; val:level -22.5 ; val:pan 0.1 ; val:highpass 220 .
-:pad a val:Part ; val:index 5 ; val:circuit "circuits/y2k-pad.ttl" ; val:level -28.5 ; val:pan -0.1 ; val:highpass 180 .
+:pad a val:Part ; val:index 5 ; val:circuit "circuits/y2k-pad.ttl" ; val:level -28.5 ; val:pan 0 ; val:highpass 180 .
 :arp a val:Part ; val:index 6 ; val:circuit "circuits/y2k-bleep.ttl" ; val:level -26 ; val:pan 0.25 ; val:highpass 500 .
 :lead a val:Part ; val:index 7 ; val:circuit "circuits/y2k-lead.ttl" ; val:level -22 ; val:pan 0.05 ; val:highpass 260 .
 :riser a val:Part ; val:index 8 ; val:circuit "circuits/y2k-riser.ttl" ; val:level -28 ; val:pan 0 ; val:highpass 300 .
