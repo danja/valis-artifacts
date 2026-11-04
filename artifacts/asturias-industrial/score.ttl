@@ -1,0 +1,52 @@
+# score.ttl
+#
+# Asturias Industrial: chords, patterns, plays, feels.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:asturias-industrial#> .
+
+:score a val:Score ; val:seed 1971 ;
+    val:progression "Em B7 Em C B7 Em" ;
+    val:barsPerChord 1 ;
+    val:hasChord :Em , :B7 , :C ;
+    val:hasPattern :kick-pat , :kit-pat , :bass-pat , :arp-pat , :lead-pat , :metal-pat , :guitar-pat , :riser-pat ;
+    val:hasFeel :kit-feel , :metal-feel ;
+    val:hasPlay :p-kick-intro , :p-lead-intro , :p-kick-build , :p-metal-build , :p-kick-drop1 , :p-kit-drop1 , :p-bass-drop1 , :p-lead-drop1 , :p-metal-drop1 , :p-guitar-break , :p-kick-build2 , :p-metal-build2 , :p-kick-drop2 , :p-kit-drop2 , :p-bass-drop2 , :p-lead-drop2 , :p-guitar-outro .
+
+:Em a val:Chord ; val:root 40 ; val:tones "52 55 59" .
+:B7 a val:Chord ; val:root 47 ; val:tones "59 62 66" .
+:C  a val:Chord ; val:root 36 ; val:tones "48 52 55" .
+
+:kick-pat a val:Pattern ; val:hasLane [ val:key 36 ; val:steps "X...|....|X...|...." ] .
+:kit-pat a val:Pattern ; val:hasLane
+    [ val:key 36 ; val:steps "X...|....|X...|...." ; val:velocity 75 ; val:accent 10 ] ,
+    [ val:key 38 ; val:steps "....|X...|....|X..." ; val:velocity 75 ; val:accent 10 ] ,
+    [ val:key 42 ; val:steps "x.x.|x.x.|x.x.|x.x." ; val:velocity 55 ] .
+:bass-pat a val:Pattern ; val:hasLane [ val:voice "root" ; val:steps "X...|....|....|...." ; val:length 3 ; val:gate 0.9 ] .
+:arp-pat a val:Pattern ; val:hasLane [ val:voice "top" ; val:steps "xxxx|xxxx|xxxx|xxxx" ; val:velocity 78 ; val:length 1 ] .
+:lead-pat a val:Pattern ; val:hasLane [ val:voice "top" ; val:steps "x...|....|x...|...." ; val:velocity 100 ; val:length 3 ; val:gate 0.9 ] .
+:metal-pat a val:Pattern ; val:hasLane [ val:key 60 ; val:steps "....|....|....|x..." ; val:velocity 100 ] .
+:guitar-pat a val:Pattern ; val:hasLane [ val:voice "chord" ; val:steps "x...|....|....|...." ; val:octave 1 ; val:length 3 ; val:gate 0.9 ] .
+:riser-pat a val:Pattern ; val:bars 8 ; val:hasLane [ val:key 60 ; val:steps "x..............................................................................................................................." ] .
+
+:kit-feel a val:Feel ; val:part "kit" ; val:timing 3 ; val:velocity 4 ; val:swing 0.54 .
+:metal-feel a val:Feel ; val:part "metal" ; val:timing 8 ; val:velocity 6 .
+
+:p-kick-intro a val:Play ; val:section "intro" ; val:part "kick" ; val:pattern :kick-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-lead-intro a val:Play ; val:section "intro" ; val:part "lead" ; val:pattern :lead-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-kick-build a val:Play ; val:section "build" ; val:part "kick" ; val:pattern :kick-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-metal-build a val:Play ; val:section "build" ; val:part "metal" ; val:pattern :metal-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-kick-drop1 a val:Play ; val:section "drop1" ; val:part "kick" ; val:pattern :kick-pat ; val:fromBar 1 ; val:toBar 16 .
+:p-kit-drop1 a val:Play ; val:section "drop1" ; val:part "kit" ; val:pattern :kit-pat ; val:fromBar 1 ; val:toBar 16 .
+:p-bass-drop1 a val:Play ; val:section "drop1" ; val:part "bass" ; val:pattern :bass-pat ; val:fromBar 1 ; val:toBar 16 .
+:p-lead-drop1 a val:Play ; val:section "drop1" ; val:part "lead" ; val:pattern :lead-pat ; val:fromBar 1 ; val:toBar 16 .
+:p-metal-drop1 a val:Play ; val:section "drop1" ; val:part "metal" ; val:pattern :metal-pat ; val:fromBar 1 ; val:toBar 16 .
+:p-guitar-break a val:Play ; val:section "break" ; val:part "guitar" ; val:pattern :guitar-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-kick-build2 a val:Play ; val:section "build2" ; val:part "kick" ; val:pattern :kick-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-metal-build2 a val:Play ; val:section "build2" ; val:part "metal" ; val:pattern :metal-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-kick-drop2 a val:Play ; val:section "drop2" ; val:part "kick" ; val:pattern :kick-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-kit-drop2 a val:Play ; val:section "drop2" ; val:part "kit" ; val:pattern :kit-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-bass-drop2 a val:Play ; val:section "drop2" ; val:part "bass" ; val:pattern :bass-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-lead-drop2 a val:Play ; val:section "drop2" ; val:part "lead" ; val:pattern :lead-pat ; val:fromBar 1 ; val:toBar 8 .
+:p-guitar-outro a val:Play ; val:section "outro" ; val:part "guitar" ; val:pattern :guitar-pat ; val:fromBar 1 ; val:toBar 8 .

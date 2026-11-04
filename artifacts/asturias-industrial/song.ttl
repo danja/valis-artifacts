@@ -1,0 +1,44 @@
+# song.ttl
+#
+# "Asturias Industrial": the layout and the mix as data.
+
+@prefix val:  <http://purl.org/stuff/valis/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix :     <urn:valis-artifacts:asturias-industrial#> .
+
+:song a val:Song ;
+    val:title "Asturias Industrial" ;
+    val:tempo 140 ;
+    val:score "score.ttl" ;
+    val:loudness -10 ;
+    val:tailSeconds 10 ;
+    val:fadeSeconds 6 ;
+    val:roomAmount 0.05 ;
+    val:roomDecay 0.4 ;
+    val:roomLowpass 4000 ;
+    val:drive 3.0 ;
+    val:hasSection :intro , :build , :drop1 , :break , :build2 , :drop2 , :outro ;
+    val:hasPart :kick , :kit , :bass , :lead , :arp , :guitar , :metal , :riser ;
+    val:hasReturn :lead-echo , :guitar-verb .
+
+:intro a val:Section ; val:index 1 ; val:bars 8 ; val:level -4 .
+:build a val:Section ; val:index 2 ; val:bars 8 ; val:level -2 .
+:drop1 a val:Section ; val:index 3 ; val:bars 16 ; val:level 0 .
+:break a val:Section ; val:index 4 ; val:bars 8 ; val:level 2 .
+:build2 a val:Section ; val:index 5 ; val:bars 8 ; val:level -2 .
+:drop2 a val:Section ; val:index 6 ; val:bars 8 ; val:level 1 .
+:outro a val:Section ; val:index 7 ; val:bars 8 ; val:level -3 .
+
+:kick a val:Part ; val:index 1 ; val:circuit "circuits/nursery-humpty-kick.ttl" ; val:level -17 ; val:pan 0 ; val:highpass 30 .
+:kit a val:Part ; val:index 2 ; val:circuit "circuits/909.ttl" ; val:level -28 ; val:pan 0 ; val:highpass 130 .
+:bass a val:Part ; val:index 3 ; val:circuit "circuits/halloween-bass.ttl" ; val:level -21 ; val:pan 0 ; val:highpass 30 .
+:lead a val:Part ; val:index 4 ; val:circuit "circuits/fuzz-lead.ttl" ; val:level -18 ; val:pan 0.05 ; val:highpass 260 .
+:arp a val:Part ; val:index 5 ; val:circuit "circuits/sh101.ttl" ; val:level -24 ; val:pan 0.25 ; val:highpass 500 .
+:guitar a val:Part ; val:index 6 ; val:circuit "circuits/nylon-guitar.ttl" ; val:level -24 ; val:pan -0.1 ; val:highpass 220 .
+:metal a val:Part ; val:index 7 ; val:circuit "circuits/metal-clang.ttl" ; val:level -28 ; val:pan 0.3 ; val:highpass 400 .
+:riser a val:Part ; val:index 8 ; val:circuit "circuits/nursery-wind-up-riser.ttl" ; val:level -28 ; val:pan 0 ; val:highpass 300 .
+
+:lead-echo a val:Return ; val:index 1 ; val:source :lead ; val:circuit "circuits/dub-delay.ttl" ;
+    val:level -28 ; val:pan 0.4 ; val:highpass 600 .
+:guitar-verb a val:Return ; val:index 2 ; val:source :guitar ; val:circuit "circuits/reverb-return.ttl" ;
+    val:level -28 ; val:pan -0.4 ; val:highpass 250 .
