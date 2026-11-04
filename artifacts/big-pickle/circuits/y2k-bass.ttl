@@ -1,0 +1,161 @@
+# y2k-bass.ttl
+# 
+# A rolling techno bass. A saw at the played pitch and a square an octave below go through a
+# resonant 24 dB low-pass that an envelope opens on every note, then a gentle tanh and a DC blocker. It is
+# monophonic and plays from E1 to E3. The short envelope leaves a gap between sixteenths, so the line pumps
+# instead of blurring.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis-artifacts:big-pickle:y2kbass#> .
+
+:y2kbass a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    rdfs:label "Y2K rolling bass" ;
+    val:element :pitch , :sub , :osc1 , :osc2 , :l1 , :l2 , :mix , :filtEnv , :filtScale , :vcf , :ampEnv , :vca , :drive , :dc , :trim , :limit , :out ;
+    val:arc :a_pitch_out__osc1_frequency ,
+        :a_pitch_out__sub_a ,
+        :a_sub_out__osc2_frequency ,
+        :a_osc1_out__l1_in ,
+        :a_osc2_out__l2_in ,
+        :a_l1_out__mix_in ,
+        :a_l2_out__mix_in ,
+        :a_mix_out__vcf_in ,
+        :a_filtEnv_out__filtScale_in ,
+        :a_filtScale_out__vcf_cutoff ,
+        :a_vcf_out__vca_in ,
+        :a_ampEnv_out__vca_cv ,
+        :a_vca_out__drive_in ,
+        :a_drive_out__dc_in ,
+        :a_dc_out__trim_in ,
+        :a_trim_out__limit_in ,
+        :a_limit_out__out_in .
+
+:pitch a val:MidiPitch .
+
+:sub a val:ControlMultiply ;
+    val:b 0.5 .
+
+:osc1 a val:Oscillator ;
+    val:shape 1 .
+
+:osc2 a val:Oscillator ;
+    val:shape 2 .
+
+:l1 a val:Gain ;
+    val:gain -4.0 .
+
+:l2 a val:Gain ;
+    val:gain -8.0 .
+
+:mix a val:Mixer .
+
+:filtEnv a val:Envelope ;
+    val:attack 1.0 ;
+    val:decay 160.0 ;
+    val:sustain 0.18 ;
+    val:release 80.0 .
+
+:filtScale a val:Scale ;
+    val:min 140.0 ;
+    val:max 2600.0 .
+
+:vcf a val:Ladder ;
+    val:resonance 0.28 ;
+    val:drive 1.5 .
+
+:ampEnv a val:Envelope ;
+    val:attack 1.0 ;
+    val:decay 140.0 ;
+    val:sustain 0.82 ;
+    val:release 70.0 .
+
+:vca a val:VCA .
+
+:drive a val:Tanh ;
+    val:gain 2.0 .
+
+:dc a val:OnePole ;
+    val:mode 1 ;
+    val:cutoff 25.0 .
+
+:trim a val:Gain ;
+    val:gain -7.0 .
+
+:limit a val:Limiter ;
+    val:ceiling -1.0 .
+
+:out a val:Output .
+
+:a_pitch_out__osc1_frequency a val:ControlArc ;
+    val:from [ val:node :pitch ; val:port "out" ] ;
+    val:to   [ val:node :osc1 ; val:port "frequency" ] .
+
+:a_pitch_out__sub_a a val:ControlArc ;
+    val:from [ val:node :pitch ; val:port "out" ] ;
+    val:to   [ val:node :sub ; val:port "a" ] .
+
+:a_sub_out__osc2_frequency a val:ControlArc ;
+    val:from [ val:node :sub ; val:port "out" ] ;
+    val:to   [ val:node :osc2 ; val:port "frequency" ] .
+
+:a_osc1_out__l1_in a val:Arc ;
+    val:from [ val:node :osc1 ; val:port "out" ] ;
+    val:to   [ val:node :l1 ; val:port "in" ] .
+
+:a_osc2_out__l2_in a val:Arc ;
+    val:from [ val:node :osc2 ; val:port "out" ] ;
+    val:to   [ val:node :l2 ; val:port "in" ] .
+
+:a_l1_out__mix_in a val:Arc ;
+    val:from [ val:node :l1 ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_l2_out__mix_in a val:Arc ;
+    val:from [ val:node :l2 ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_mix_out__vcf_in a val:Arc ;
+    val:from [ val:node :mix ; val:port "out" ] ;
+    val:to   [ val:node :vcf ; val:port "in" ] .
+
+:a_filtEnv_out__filtScale_in a val:ControlArc ;
+    val:from [ val:node :filtEnv ; val:port "out" ] ;
+    val:to   [ val:node :filtScale ; val:port "in" ] .
+
+:a_filtScale_out__vcf_cutoff a val:ControlArc ;
+    val:from [ val:node :filtScale ; val:port "out" ] ;
+    val:to   [ val:node :vcf ; val:port "cutoff" ] .
+
+:a_vcf_out__vca_in a val:Arc ;
+    val:from [ val:node :vcf ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "in" ] .
+
+:a_ampEnv_out__vca_cv a val:ControlArc ;
+    val:from [ val:node :ampEnv ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "cv" ] .
+
+:a_vca_out__drive_in a val:Arc ;
+    val:from [ val:node :vca ; val:port "out" ] ;
+    val:to   [ val:node :drive ; val:port "in" ] .
+
+:a_drive_out__dc_in a val:Arc ;
+    val:from [ val:node :drive ; val:port "out" ] ;
+    val:to   [ val:node :dc ; val:port "in" ] .
+
+:a_dc_out__trim_in a val:Arc ;
+    val:from [ val:node :dc ; val:port "out" ] ;
+    val:to   [ val:node :trim ; val:port "in" ] .
+
+:a_trim_out__limit_in a val:Arc ;
+    val:from [ val:node :trim ; val:port "out" ] ;
+    val:to   [ val:node :limit ; val:port "in" ] .
+
+:a_limit_out__out_in a val:Arc ;
+    val:from [ val:node :limit ; val:port "out" ] ;
+    val:to   [ val:node :out ; val:port "in" ] .

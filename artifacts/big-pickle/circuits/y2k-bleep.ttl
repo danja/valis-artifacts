@@ -1,0 +1,133 @@
+# y2k-bleep.ttl
+# 
+# A digital bleep: a square at the played pitch and a sine an octave above, mixed and held at
+# 9 bits with a little sample-rate reduction, so the line has the grain of a 2000 game console. A short
+# envelope and a high-pass keep every note a separate event. Monophonic.
+
+@prefix val:   <http://purl.org/stuff/valis/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix trn:   <http://purl.org/stuff/transmissions/> .
+@prefix :      <urn:valis-artifacts:big-pickle:y2kbleep#> .
+
+:y2kbleep a val:Circuit , trn:PluginProfile ;
+    trn:role trn:AudioInstrument ;
+    trn:accepts trn:Midi ;
+    trn:produces trn:Audio ;
+    rdfs:label "Y2K bleep arpeggio" ;
+    val:element :pitch , :up , :oscA , :oscB , :lA , :lB , :mix , :redux , :ampEnv , :vca , :hp , :trim , :limit , :out ;
+    val:arc :a_pitch_out__oscA_frequency ,
+        :a_pitch_out__up_a ,
+        :a_up_out__oscB_frequency ,
+        :a_oscA_out__lA_in ,
+        :a_oscB_out__lB_in ,
+        :a_lA_out__mix_in ,
+        :a_lB_out__mix_in ,
+        :a_mix_out__redux_in ,
+        :a_redux_out__vca_in ,
+        :a_ampEnv_out__vca_cv ,
+        :a_vca_out__hp_in ,
+        :a_hp_out__trim_in ,
+        :a_trim_out__limit_in ,
+        :a_limit_out__out_in .
+
+:pitch a val:MidiPitch .
+
+:up a val:ControlMultiply ;
+    val:b 2.0 .
+
+:oscA a val:Oscillator ;
+    val:shape 2 .
+
+:oscB a val:Oscillator ;
+    val:shape 0 .
+
+:lA a val:Gain ;
+    val:gain -5.0 .
+
+:lB a val:Gain ;
+    val:gain -14.0 .
+
+:mix a val:Mixer .
+
+:redux a val:Redux ;
+    val:bits 9.0 ;
+    val:downsample 3.0 ;
+    val:jitter 0.15 .
+
+:ampEnv a val:Envelope ;
+    val:attack 0.5 ;
+    val:decay 100.0 ;
+    val:sustain 0.0 ;
+    val:release 40.0 .
+
+:vca a val:VCA .
+
+:hp a val:OnePole ;
+    val:mode 1 ;
+    val:cutoff 500.0 .
+
+:trim a val:Gain ;
+    val:gain -8.0 .
+
+:limit a val:Limiter ;
+    val:ceiling -1.0 .
+
+:out a val:Output .
+
+:a_pitch_out__oscA_frequency a val:ControlArc ;
+    val:from [ val:node :pitch ; val:port "out" ] ;
+    val:to   [ val:node :oscA ; val:port "frequency" ] .
+
+:a_pitch_out__up_a a val:ControlArc ;
+    val:from [ val:node :pitch ; val:port "out" ] ;
+    val:to   [ val:node :up ; val:port "a" ] .
+
+:a_up_out__oscB_frequency a val:ControlArc ;
+    val:from [ val:node :up ; val:port "out" ] ;
+    val:to   [ val:node :oscB ; val:port "frequency" ] .
+
+:a_oscA_out__lA_in a val:Arc ;
+    val:from [ val:node :oscA ; val:port "out" ] ;
+    val:to   [ val:node :lA ; val:port "in" ] .
+
+:a_oscB_out__lB_in a val:Arc ;
+    val:from [ val:node :oscB ; val:port "out" ] ;
+    val:to   [ val:node :lB ; val:port "in" ] .
+
+:a_lA_out__mix_in a val:Arc ;
+    val:from [ val:node :lA ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_lB_out__mix_in a val:Arc ;
+    val:from [ val:node :lB ; val:port "out" ] ;
+    val:to   [ val:node :mix ; val:port "in" ] .
+
+:a_mix_out__redux_in a val:Arc ;
+    val:from [ val:node :mix ; val:port "out" ] ;
+    val:to   [ val:node :redux ; val:port "in" ] .
+
+:a_redux_out__vca_in a val:Arc ;
+    val:from [ val:node :redux ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "in" ] .
+
+:a_ampEnv_out__vca_cv a val:ControlArc ;
+    val:from [ val:node :ampEnv ; val:port "out" ] ;
+    val:to   [ val:node :vca ; val:port "cv" ] .
+
+:a_vca_out__hp_in a val:Arc ;
+    val:from [ val:node :vca ; val:port "out" ] ;
+    val:to   [ val:node :hp ; val:port "in" ] .
+
+:a_hp_out__trim_in a val:Arc ;
+    val:from [ val:node :hp ; val:port "out" ] ;
+    val:to   [ val:node :trim ; val:port "in" ] .
+
+:a_trim_out__limit_in a val:Arc ;
+    val:from [ val:node :trim ; val:port "out" ] ;
+    val:to   [ val:node :limit ; val:port "in" ] .
+
+:a_limit_out__out_in a val:Arc ;
+    val:from [ val:node :limit ; val:port "out" ] ;
+    val:to   [ val:node :out ; val:port "in" ] .
