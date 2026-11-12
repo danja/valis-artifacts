@@ -1,0 +1,38 @@
+# song.ttl
+#
+# Danube Ciao: a D-major waltz carrying Bella Ciao in B minor.
+
+@prefix val: <http://purl.org/stuff/valis/> .
+@prefix : <urn:valis-artifacts:danube-ciao#> .
+
+:song a val:Song ;
+    val:title "Danube Ciao" ;
+    val:tempo 126 ;
+    val:beatsPerBar 3 ;
+    val:loudness -14 ;
+    val:tailSeconds 8 ;
+    val:fadeSeconds 4 ;
+    val:roomAmount 0.14 ;
+    val:roomDecay 0.65 ;
+    val:roomLowpass 6500 ;
+    val:drive 1.15 ;
+    val:hasSection :intro , :bella-ciao , :blue-danube , :crossing , :break , :finale , :coda ;
+    val:hasPart :blue , :ciao , :chords , :bass , :kick , :shakers ;
+    val:hasReturn :blue-hall .
+
+:intro a val:Section ; val:index 1 ; val:bars 4 ; val:level -2 .
+:bella-ciao a val:Section ; val:index 2 ; val:bars 8 ; val:level -0.5 .
+:blue-danube a val:Section ; val:index 3 ; val:bars 8 ; val:level 0 .
+:crossing a val:Section ; val:index 4 ; val:bars 8 ; val:level 0 .
+:break a val:Section ; val:index 5 ; val:bars 4 ; val:level -2 .
+:finale a val:Section ; val:index 6 ; val:bars 12 ; val:level 1 .
+:coda a val:Section ; val:index 7 ; val:bars 4 ; val:level -2 .
+
+:blue a val:Part ; val:index 1 ; val:circuit "circuits/violins.ttl" ; val:level -22 ; val:pan -0.15 ; val:highpass 150 .
+:ciao a val:Part ; val:index 2 ; val:circuit "circuits/clarinet.ttl" ; val:level -23 ; val:pan 0.15 ; val:highpass 180 .
+:chords a val:Part ; val:index 3 ; val:circuit "circuits/nylon-guitar.ttl" ; val:level -25 ; val:pan 0 ; val:highpass 120 .
+:bass a val:Part ; val:index 4 ; val:circuit "circuits/dub-bass.ttl" ; val:level -23 ; val:pan 0 ; val:highpass 35 .
+:kick a val:Part ; val:index 5 ; val:circuit "circuits/808-bd.ttl" ; val:level -28 ; val:pan 0 ; val:highpass 35 .
+:shakers a val:Part ; val:index 6 ; val:circuit "circuits/latin-perc.ttl" ; val:level -34 ; val:pan 0.25 ; val:highpass 500 .
+
+:blue-hall a val:Return ; val:index 1 ; val:source :blue ; val:circuit "circuits/reverb-return.ttl" ; val:level -29 ; val:pan -0.4 .

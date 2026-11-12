@@ -1,0 +1,109 @@
+<REAPER_PROJECT 0.1 "7.83/linux-x86_64" 1793285344 0
+  TEMPO 126 3 4
+  SAMPLERATE 48000 0 0
+  <TRACK
+    NAME "blue"
+    VOLPAN 0.0678207 -0.15 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000001}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "blue.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/blue.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "ciao"
+    VOLPAN 0.046774 0.15 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000002}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "ciao.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/ciao.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "chords"
+    VOLPAN 0.232127 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000003}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "chords.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/chords.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "bass"
+    VOLPAN 0.0516285 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000004}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "bass.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/bass.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "kick"
+    VOLPAN 0.0189404 0 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000005}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "kick.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/kick.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "shakers"
+    VOLPAN 1 0.25 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000006}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "shakers.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/shakers.wav"
+      >
+    >
+  >
+  <TRACK
+    NAME "blue-hall"
+    VOLPAN 0.025467 -0.4 -1 -1 1
+    MUTESOLO 0 0 0
+    TRACKID {00000000-0000-4000-8000-000000000007}
+    <ITEM
+      POSITION 0
+      LENGTH 76.5714
+      LOOP 0
+      NAME "blue-hall.wav"
+      <SOURCE WAVE
+        FILE "/home/danny/github/valis-artifacts/artifacts/danube-ciao/wavs/blue-hall.wav"
+      >
+    >
+  >
+>
